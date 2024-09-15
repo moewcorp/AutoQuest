@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34330.188
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutoQuest", "AutoQuest\AutoQuest.csproj", "{FF3982EB-D617-4C84-9BE3-CEDB808752F7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FF3982EB-D617-4C84-9BE3-CEDB808752F7}.Debug|x64.ActiveCfg = Debug|x64
+		{FF3982EB-D617-4C84-9BE3-CEDB808752F7}.Debug|x64.Build.0 = Debug|x64
+		{FF3982EB-D617-4C84-9BE3-CEDB808752F7}.Release|x64.ActiveCfg = Release|x64
+		{FF3982EB-D617-4C84-9BE3-CEDB808752F7}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {63F5E786-A7DF-4271-95BB-BAF025E626D0}
+	EndGlobalSection
+EndGlobal
