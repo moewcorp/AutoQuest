@@ -1,0 +1,2 @@
+# AutoQuest
+FFXIV auto quest
