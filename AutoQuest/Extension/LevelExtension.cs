@@ -15,5 +15,10 @@ namespace AutoQuest.Extension
             }
             return false;
         }
+        public static Vector3 Pos(this Level level) => new Vector3(level.X, level.Y, level.Z);
+        public static string Info(this Level level)
+        {
+            return $"{level.Territory.Value.PlaceName.Value.Name} {level.Pos()}";
+        }
     }
 }
