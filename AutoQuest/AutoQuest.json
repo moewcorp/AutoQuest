@@ -1,0 +1,17 @@
+{
+  "Author": "developer",
+  "Name": "AutoQuest",
+  "Punchline": "Hello world",
+  "Description": "",
+  "InternalName": "AutoQuest",
+  "ApplicableVersion": "any",
+  "Tags": [
+    "quest",
+    "auto",
+    "plugin"
+  ],
+  "IconUrl": "",
+  "RepoUrl": "",
+  "DalamudApiLevel": 9,
+  "AssemblyVersion": ""
+}

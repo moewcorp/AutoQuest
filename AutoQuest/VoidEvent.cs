@@ -1,6 +1,7 @@
 using ECommons.DalamudServices;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using FFXIVClientStructs.FFXIV.Client.Game.Object;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using EventHandler = FFXIVClientStructs.FFXIV.Client.Game.Event.EventHandler;
 
@@ -176,6 +177,35 @@ namespace AutoQuest
             QuestId = questId;
             unk = 0x4000000u | scene;
             Count = count;
+        }
+    }
+    [StructLayout(LayoutKind.Explicit)]
+    struct EventAcrion
+    {
+        [FieldOffset(0x00)] public long TargetId;
+        [FieldOffset(0x08)] public uint id;
+        [FieldOffset(0x0c)] public ushort Scene;
+        [FieldOffset(0x10)] public long unk3;
+        [FieldOffset(0x18)] public byte unk4;
+        [FieldOffset(0x1c)] public long unk5;
+        public override string ToString()
+        {
+            return $"TargetId:{TargetId:X} id:{id} Scene:{Scene} unk3:{unk3} unk4:{unk4} unk5:{unk5}";
+        }
+    }
+    [StructLayout(LayoutKind.Explicit, Size = 0x38)]
+    public struct EventEnterRange
+    {
+        [FieldOffset(0x00)] public int Opcode = 356;
+        [FieldOffset(0x08)] public uint Length = 0x28;
+        [FieldOffset(0x20)] public uint RangeId;
+        [FieldOffset(0x24)] public uint QuestId;
+        [FieldOffset(0x28)] public Vector3 Pos = Svc.ClientState.LocalPlayer.Position;
+        [FieldOffset(0x34)] public uint unk4 = 0;
+        public EventEnterRange(uint rangeId, uint questId)
+        {
+            RangeId = rangeId;
+            QuestId = questId;
         }
     }
 }

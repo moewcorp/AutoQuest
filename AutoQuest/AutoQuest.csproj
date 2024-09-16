@@ -9,7 +9,7 @@
   </PropertyGroup>
 
 	<PropertyGroup>
-		<DalamudLibPath>D:\Dalamud.Updater\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
+		<DalamudLibPath>D:\Dalamud.Updater\XIVLauncher\addon\Hooks\9.1.0.12\</DalamudLibPath>
 	</PropertyGroup>
 
   <ItemGroup>
@@ -18,8 +18,9 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="ECommons">
-      <HintPath>Resources\ECommons.dll</HintPath>
+      <HintPath>..\References\ECommons.dll</HintPath>
       <Private>False</Private>
+
     </Reference>
     <Reference Include="FFXIVClientStructs">
       <HintPath>$(DalamudLibPath)FFXIVClientStructs.dll</HintPath>
@@ -42,28 +43,22 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="SaintCoinach">
-      <HintPath>Resources\SaintCoinach.dll</HintPath>
+      <HintPath>..\References\SaintCoinach.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Unluac">
-      <HintPath>Resources\Unluac.dll</HintPath>
+      <HintPath>..\References\Unluac.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
-
   <ItemGroup>
-    <Compile Update="Resource.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resource.resx</DependentUpon>
-    </Compile>
+	<None Update="AutoQuest.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	</None>
   </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Update="Resource.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resource.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-  </ItemGroup>
-
+	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
+	  <Copy SourceFiles="$(SolutionDir)References\ECommons.dll" DestinationFolder="$(TargetDir)" />
+		<Copy SourceFiles="$(SolutionDir)References\Unluac.dll" DestinationFolder="$(TargetDir)" />
+		<Copy SourceFiles="$(SolutionDir)References\SaintCoinach.dll" DestinationFolder="$(TargetDir)" />
+	</Target>
 </Project>
