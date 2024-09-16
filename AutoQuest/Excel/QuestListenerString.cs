@@ -10,11 +10,13 @@ namespace AutoQuest.Excel
         public uint Listener;
         public uint ConditionValue;
         public uint Content;
-        public QuestListenerString(QuestListenerParamsStruct listener, uint content = 0) : this(listener.Listener, listener.ConditionValue, content) { }
-        public QuestListenerString(uint listener,uint conditionValue, uint content = 0)
+        public byte Type;
+        public QuestListenerString(QuestListenerParamsStruct listener, uint content = 0) : this(listener.Listener, listener.ConditionValue, listener.QuestUInt8A, content) { }
+        public QuestListenerString(uint listener,uint conditionValue, byte type,uint content = 0)
         {
             Listener = listener;
             ConditionValue = conditionValue;
+            Type = type;
             Content = content;
         }
         public override string ToString()
@@ -22,18 +24,18 @@ namespace AutoQuest.Excel
             if (Listener == 5000000)
             {
                 var data = Svc.Data.GetExcelSheet<Level>()?.GetRow(ConditionValue);
-                return $"{data} Pos:{data.Territory.Value.PlaceName.Value.Name}{new Vector3(data.X, data.Y, data.Z)} Object:{data.Object.Row}";
+                return $"{(EventType)Type} {data} Pos:{data.Territory.Value.PlaceName.Value.Name}{new Vector3(data.X, data.Y, data.Z)} Object:{data.Object.Row}";
             }
             else if(Listener == 5010000)
             {
                 if(Content != 0)
                 {
                     var str = string.Empty;
-                    foreach (var s in Svc.Data.GetExcelSheet<ContentFinderCondition>()?.Where(c => c.Content.Row == Content).Select(s => s.Name.ToString() + " "))
+                    foreach (var s in Svc.Data.GetExcelSheet<ContentFinderCondition>()?.Where(c => c.Content.Row == Content))
                     {
-                        str += s;
+                        str += $"{s} {s.Name}";
                     }
-                    return str;
+                    return $"{(EventType)Type} {str}";
                 }
                 return Content.ToString();
             }//5020000 可能是去某个地图
@@ -45,26 +47,25 @@ namespace AutoQuest.Excel
             {
                 var eobj = Svc.Data.GetExcelSheet<EObj>()?.GetRow(Listener);
                 var eobjname = Svc.Data.GetExcelSheet<EObjName>()?.GetRow(Listener);
-                return $"{eobj} {eobjname.Singular}";
+                return $"{(EventType)Type} {eobj} {eobjname.Singular}";
             }
             else if (Listener > 1000000)
             {
                 var enpc = Svc.Data.GetExcelSheet<ENpcBase>()?.GetRow(Listener);
                 var enpcname = Svc.Data.GetExcelSheet<ENpcResident>()?.GetRow(Listener);
-                return $"{enpc} {enpcname.Singular}";
+                return $"{(EventType)Type} {enpc} {enpcname.Singular}";
             }
             else
             {
                 var bnpc = Svc.Data.GetExcelSheet<BNpcBase>()?.GetRow(Listener);
-                var name = Svc.Data.GetExcelSheet<BNpcName>()?.GetRow(Listener);
                 if (ConditionValue == 0)
                 {
-                    return $"{bnpc} {name.Singular}";
+                    return $"{(EventType)Type} {bnpc} BaseId:{Listener}";
                 }
                 else
                 {
                     var lel = Svc.Data.GetExcelSheet<Level>()?.GetRow(ConditionValue);
-                    return $"EventBNpc#{Listener} Pos:{lel.Territory.Value.PlaceName.Value.Name}{new Vector3(lel.X, lel.Y, lel.Z)} Object:{lel.Object.Row} {name.Singular}";
+                    return $"{(EventType)Type} EventBNpc#{Listener} Pos:{lel.Territory.Value.PlaceName.Value.Name}{new Vector3(lel.X, lel.Y, lel.Z)} Object:{lel.Object.Row}";
                 }
             }
             return "null";
@@ -73,5 +74,14 @@ namespace AutoQuest.Excel
         {
             return s.ToString();
         }
+    }
+    public enum EventType : byte
+    {
+        Normal = 1,
+        RangeEnemy = 5,
+        UseEventItem = 8,
+        Enemy = 9,
+        Range = 10,
+        EnterTerr = 15,
     }
 }

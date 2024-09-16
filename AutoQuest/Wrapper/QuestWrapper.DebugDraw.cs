@@ -233,9 +233,9 @@ namespace AutoQuest
             foreach (var SeqMessages in Quest.QuestTodoMessages.Where(s=>s.Value.Value.ToString() != ""))
             {
                 var seq = SeqMessages.Value.Variable.ToString().Split('_').Last().ToNumber();
-                ImGui.Text($"{seq} - 0xff {SeqMessages.Value.Value}");
+                ImGui.Text($"{seq} - 0xFF {MaxSeq} {SeqMessages.Value.Value}");
                 {
-                    foreach (var Msg in Quest.QuestListenerParams.Where(l => l.ActorSpawnSeq == (seq + 1) && l.ActorDespawnSeq != 0xff && l.Listener != 5020000))
+                    foreach (var Msg in Quest.QuestListenerParams.Where(l => (l.ActorSpawnSeq == (seq + 1) || (l.ActorSpawnSeq == 0XFF && MaxSeq == (seq + 1))) && l.ActorDespawnSeq != 0xff && l.Listener != 5020000))
                     {
                         ImGui.Text($"    {new QuestListenerString(Msg, Quest.QuestParams.Where(s => s.ScriptInstruction.ToString().Contains("INSTANCEDUNGEON")).FirstOrDefault().ScriptArg)}");
                     }

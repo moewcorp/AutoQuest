@@ -100,15 +100,27 @@ namespace AutoQuest
         public string QuestMessagePath => Quest.MessagesPath;
         public string LuaFilePath => Quest.LuaFile.Path;
         public bool IsComplete => QuestManager.IsQuestComplete(QuestId);
-        public uint GetMaxSeq()
+        public byte GetMaxSeq()
         {
             var todo = Quest.TodoParams;
-            for (var i = 0u; i < 24 ; i++)
+            for (byte i = 0; i < 24 ; i++)
             {
                 if (todo[i].ToDoCompleteSeq == 0xff)
-                    return i+1;
+                    return (byte)(i + 1);
             }
             throw new Exception();
+        }
+        public byte? _MaxSeq;
+        public byte MaxSeq
+        {
+            get
+            {
+                if(_MaxSeq == null)
+                {
+                    _MaxSeq = GetMaxSeq();
+                }
+                return (byte)_MaxSeq;
+            }
         }
         public object? DataIdToObject(uint dataid)
         {
