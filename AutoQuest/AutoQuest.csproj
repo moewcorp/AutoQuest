@@ -12,6 +12,10 @@
 		<DalamudLibPath>D:\Dalamud.Updater\XIVLauncher\addon\Hooks\9.1.0.12\</DalamudLibPath>
 	</PropertyGroup>
 
+	<ItemGroup>
+	  <PackageReference Include="DalamudPackager" Version="2.1.13" />
+	</ItemGroup>
+
   <ItemGroup>
     <Reference Include="Dalamud">
       <HintPath>$(DalamudLibPath)Dalamud.dll</HintPath>

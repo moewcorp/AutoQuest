@@ -1,10 +1,13 @@
 using AutoQuest.Excel;
 using AutoQuest.Extension;
+using ECommons;
 using ECommons.DalamudServices;
+using FFXIVClientStructs.FFXIV.Client.UI;
 using ImGuiNET;
 using Lumina.Excel.GeneratedSheets2;
 using QuestResolve;
 using System.Numerics;
+using System.Runtime.InteropServices;
 using static AutoQuest.QuestEntry;
 
 namespace AutoQuest
@@ -227,17 +230,73 @@ namespace AutoQuest
                         using var indent2 = new ImGuiIndent(20);
                         var loc = Quest.TodoParams.Where(t => t.ToDoCompleteSeq == (seq + 1) || (MaxSeq == (seq + 1) && t.ToDoCompleteSeq == 0xff)).First();
                         var i = 0;
-                        foreach (var Msg in Quest.QuestListenerParams.Where(l => (l.ActorSpawnSeq == (seq + 1) || (l.ActorSpawnSeq == 0XFF && MaxSeq == (seq + 1))) && l.ActorDespawnSeq != 0xff && l.Listener != 5020000))
+                        var lis = Quest.QuestListenerParams.Where(l => (l.ActorSpawnSeq == (seq + 1) || (l.ActorSpawnSeq == 0XFF && MaxSeq == (seq + 1))) && l.ActorDespawnSeq != 0xff);
+                        foreach (var Msg in lis)
                         {
-                            ImGui.Text($"{new QuestListenerString(Msg, Quest.QuestParams.Where(s => s.ScriptInstruction.ToString().Contains("INSTANCEDUNGEON")).FirstOrDefault().ScriptArg)} {loc.ToDoLocation[i++].Value.Info()}");
+                            //if (Msg.Listener != 5020000 || (lis.Count() == 1 && loc.ToDoLocation[i].Value != null))
+                            {
+                                var content = 0u;
+                                if (Msg.Listener == 5010000)
+                                {
+                                    var index = Quest.QuestListenerParams.Where(l => l.Listener == 5010000).IndexOf(l => l.ActorSpawnSeq == Msg.ActorSpawnSeq && l.ActorDespawnSeq == Msg.ActorDespawnSeq);
+                                    var dungeons = Quest.QuestParams.Where(s => s.ScriptInstruction.ToString().Contains("INSTANCEDUNGEON")).ToList();
+                                    if (dungeons.Count > index)
+                                        content = dungeons[index].ScriptArg;
+                                }
+                                var territory = 0u;
+                                if (Msg.Listener == 5020000)
+                                {
+                                    var index = Quest.QuestListenerParams.Where(l => l.Listener == 5020000).IndexOf(l => l.ActorSpawnSeq == Msg.ActorSpawnSeq && l.ActorDespawnSeq == Msg.ActorDespawnSeq);
+                                    var territorys = Quest.QuestParams.Where(s => s.ScriptInstruction.ToString().Contains("TERRITORYTYPE")).ToList();
+                                    if (territorys.Count > index)
+                                        territory = territorys[index].ScriptArg;
+                                }
+                                ImGui.Text($"{new QuestListenerString(Msg,content,territory)}");
+                                if (loc.ToDoLocation[i].Value != null)
+                                {
+                                    ImGui.SameLine();
+                                    ImGuiHelper.ClickText(loc.ToDoLocation[i].Value.Info(), "µã»÷Ìø×ª", () =>
+                                    {
+                                        OpenMapWithMapLink(loc.ToDoLocation[i].Value.ToMapLinkString());
+                                    });
+                                    i++;
+                                }
+                            }
                         }
                     }
                 }
             }
-            catch
+            catch(Exception ex)
             {
+                LogHelper.Error(ex.ToString());
                 return;
             }
+        }
+        private delegate bool OpenMapWithFlagDelegate(nint ptr, string str);
+        private unsafe delegate nint GetUIMapObjectDelegate(UIModule* instance);
+        public bool OpenMapWithMapLink(string mapLinkString)
+        {
+            unsafe
+            {
+                var uIModule = UIModule.Instance();
+                if (uIModule == null)
+                {
+                    return false;
+                }
+
+                IntPtr intPtr = GetVirtualFunction<GetUIMapObjectDelegate>((nint)uIModule, 0, 8)(uIModule);
+                if (intPtr == IntPtr.Zero)
+                {
+                    return false;
+                }
+                return GetVirtualFunction<OpenMapWithFlagDelegate>(intPtr, 0, 63)(intPtr, mapLinkString);
+            }
+        }
+        public T GetVirtualFunction<T>(IntPtr address, int vtableOffset, int count) where T : class
+        {
+            IntPtr ptr = Marshal.ReadIntPtr(address, vtableOffset);
+            IntPtr ptr2 = Marshal.ReadIntPtr(ptr, IntPtr.Size * count);
+            return Marshal.GetDelegateForFunctionPointer<T>(ptr2);
         }
     }
     public class TreeNode : IDisposable

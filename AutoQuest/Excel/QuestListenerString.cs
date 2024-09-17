@@ -11,13 +11,15 @@ namespace AutoQuest.Excel
         public uint ConditionValue;
         public uint Content;
         public byte Type;
-        public QuestListenerString(QuestListenerParamsStruct listener, uint content = 0) : this(listener.Listener, listener.ConditionValue, listener.QuestUInt8A, content) { }
-        public QuestListenerString(uint listener,uint conditionValue, byte type,uint content = 0)
+        public uint TerritoryType;
+        public QuestListenerString(QuestListenerParamsStruct listener, uint content = 0, uint territory = 0) : this(listener.Listener, listener.ConditionValue, listener.QuestUInt8A, content, territory) { }
+        public QuestListenerString(uint listener,uint conditionValue, byte type,uint content = 0, uint territory = 0)
         {
             Listener = listener;
             ConditionValue = conditionValue;
             Type = type;
             Content = content;
+            TerritoryType = territory;
         }
         public override string ToString()
         {
@@ -39,6 +41,15 @@ namespace AutoQuest.Excel
                 }
                 return Content.ToString();
             }//5020000 可能是去某个地图
+            else if (Listener == 5020000)
+            {
+                if (TerritoryType != 0)
+                {
+                    var terr = Svc.Data.GetExcelSheet<TerritoryType>().GetRow(TerritoryType);
+                    return $"{(EventType)Type} {terr} {terr.PlaceName.Value.Name}";
+                }
+                return "TerritoryType";
+            }
             else if (Listener > 3000000)
             {
                 return "null";
@@ -82,7 +93,7 @@ namespace AutoQuest.Excel
         UseEventItem = 8,
         Enemy = 9,
         Range = 10,
-        EnterTerr = 15,
+        EnterTerritory = 15,
         Say = 23
     }
 }
