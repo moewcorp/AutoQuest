@@ -1,4 +1,5 @@
 using AutoQuest.QuestStep;
+using Dalamud.Game.ClientState.Objects.Types;
 using ECommons;
 using ECommons.DalamudServices;
 using FFXIVClientStructs.FFXIV.Client.Game;
@@ -94,7 +95,7 @@ namespace AutoQuest
                                 }
                                 else
                                 {
-                                    if (TryGetSayEvent(todod.obj,CurrentSeq,out var str))
+                                    if (TryGetSayEvent(todod.obj,CurrentSeq,obj,out var str))
                                     {
                                         todo = Step.CreateSay($"/s {str}");
                                         return true;
@@ -150,7 +151,7 @@ namespace AutoQuest
             }
             return levels.Count > 0 && listeners.Count > 0;
         }
-        public bool TryGetSayEvent(uint obj,byte seq,out string str)
+        public unsafe bool TryGetSayEvent(uint obj,byte seq,GameObject gameObject, out string str)
         {
             if (Quest.QuestListenerParams.Where(q => q.Listener == obj).Any(q => q.QuestUInt8A == 23) && DecompileCode.Value.TryGetValue("IsAcceptSayEvent", out var f))
             {
@@ -180,7 +181,8 @@ namespace AutoQuest
                                 if (oo.ScriptArg == obj && Quest.QuestTextMessages.TryGetFirst(s => s.Value?.Variable.ToString() == reg.Groups[1].Value, out var name) && name != null)
                                 {
                                     str = name.Value?.Value.ToString() ?? "null";
-                                    return true;
+                                    var ret = QuestEventHandler->IsAcceptSayEvent(gameObject, str);
+                                    return ret.Result[1] is bool a && a;
                                 }
                             }
                         }

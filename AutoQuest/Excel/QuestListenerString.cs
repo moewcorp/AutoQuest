@@ -83,5 +83,6 @@ namespace AutoQuest.Excel
         Enemy = 9,
         Range = 10,
         EnterTerr = 15,
+        Say = 23
     }
 }
