@@ -23,77 +23,62 @@ namespace AutoQuest
                     if (ImGui.Button($"C###c{Quest.Name}"))
                         ImGui.SetClipboardText(((long)QuestEventHandler).ToString("X"));
                     TreeNode.Draw($"Main###main{Quest.Name}", DrawMain);
-                    if (ImGui.TreeNode($"QuestMessge###msg{Quest.Name}"))
+                    TreeNode.Draw($"QuestMessge###msg{Quest.Name}", () =>
                     {
                         var seq = Quest.QuestSeqMessages.Where(item => item.Value != null && item.Value.Value.ToString() != "").ToList();
-                        if (ImGui.TreeNode($"Seq {seq.Count}###msgseq{Quest.Name}"))
+                        TreeNode.Draw($"Seq {seq.Count}###msgseq{Quest.Name}", () =>
                         {
                             foreach (var item in seq)
                             {
                                 ImGui.Text(item.Value.ToString());
                             }
-                            ImGui.TreePop();
-                        }
+                        });
                         var todo = Quest.QuestTodoMessages.Where(item => item.Value != null && item.Value.Value.ToString() != "").ToList();
-                        if (ImGui.TreeNode($"Todo {todo.Count}###msgtodo{Quest.Name}"))
+                        TreeNode.Draw($"Todo {seq.Count}###msgtodo{Quest.Name}", () =>
                         {
                             foreach (var item in todo)
                             {
                                 ImGui.Text(item.Value.ToString());
                             }
-                            ImGui.TreePop();
-                        }
+                        });
                         var text = Quest.QuestTextMessages.Where(item => item.Value != null && item.Value.Value.ToString() != "").ToList();
-                        if (ImGui.TreeNode($"Text {text.Count}###msgText{Quest.Name}"))
+                        TreeNode.Draw($"Text {text.Count}###msgText{Quest.Name}", () =>
                         {
                             foreach (var item in text)
                             {
                                 ImGui.Text(item.Value.ToString());
                             }
-                            ImGui.TreePop();
-                        }
-                        ImGui.TreePop();
-                    }
-                    if (ImGui.TreeNode($"Obj###osd{Quest.Name}"))
+                        });
+                    });
+                    TreeNode.Draw($"Obj###osd{Quest.Name}", () =>
                     {
-                        try
+                        if (QuestEventHandler != null)
                         {
-                            if (QuestEventHandler != null)
+                            foreach (var a in QuestEventHandler->Listeners)
                             {
-                                foreach (var a in QuestEventHandler->Listeners)
+                                foreach (var b in a.Item2)
                                 {
-                                    foreach (var b in a.Item2)
-                                    {
-                                        ImGui.Text($"seq:{a.Item1} v:{b}");
-                                    }
+                                    ImGui.Text($"seq:{a.Item1} v:{b}");
                                 }
-                                foreach (var obj in QuestEventHandler->LuaEventHandler.EventHandler.EventObjects)
-                                {
-                                    if (curs && Quest.QuestListenerParams.Where(x => x.Listener != 0 && x.ActorSpawnSeq != CurrentSeq).Any(x => x.Listener == obj.Value->DataID))
-                                        continue;
-                                    var o = Svc.Objects.CreateObjectReference((nint)obj.Value);
-                                    if (o == null)
-                                        continue;
+                            }
+                            foreach (var obj in QuestEventHandler->LuaEventHandler.EventHandler.EventObjects)
+                            {
+                                if (curs && Quest.QuestListenerParams.Where(x => x.Listener != 0 && x.ActorSpawnSeq != CurrentSeq).Any(x => x.Listener == obj.Value->DataID))
+                                    continue;
+                                var o = Svc.Objects.CreateObjectReference((nint)obj.Value);
+                                if (o == null)
+                                    continue;
 
-                                    ImGui.Text($"{obj.Value->DataID} {obj.Value->LayoutID} {QuestEventHandler->IsAcceptEvent(o)} {obj.Value->GetObjectKind()} {QuestEventHandler->IsBattleNpcOwner()} {QuestEventHandler->IsBattleNpcTriggerOwner(o)} {QuestEventHandler->IsTargetingPossible(o)} {obj.Value->GetObjectKind()}");
-                                    if (Svc.GameGui.WorldToScreen(obj.Value->Position, out var screenPos))
-                                    {
-                                        ImGui.GetBackgroundDrawList().AddCircleFilled(screenPos, 5, 0xff0000ff);
-                                        var fd = obj.Value->DrawObject;
-                                        ImGui.GetBackgroundDrawList().AddText(screenPos + new Vector2(0, 5), 0xff0000ff, obj.Value->DataID.ToString() + " " + (fd != null && fd->IsVisible).ToString() + " " + QuestEventHandler->IsAcceptEvent(Svc.Objects.CreateObjectReference((nint)obj.Value)) + " " + ((ulong)(obj.Value->GetObjectID())).ToString("X"));
-                                    }
+                                ImGui.Text($"{obj.Value->DataID} {obj.Value->LayoutID} {QuestEventHandler->IsAcceptEvent(o)} {obj.Value->GetObjectKind()} {QuestEventHandler->IsBattleNpcOwner()} {QuestEventHandler->IsBattleNpcTriggerOwner(o)} {QuestEventHandler->IsTargetingPossible(o)} {obj.Value->GetObjectKind()}");
+                                if (Svc.GameGui.WorldToScreen(obj.Value->Position, out var screenPos))
+                                {
+                                    ImGui.GetBackgroundDrawList().AddCircleFilled(screenPos, 5, 0xff0000ff);
+                                    var fd = obj.Value->DrawObject;
+                                    ImGui.GetBackgroundDrawList().AddText(screenPos + new Vector2(0, 5), 0xff0000ff, obj.Value->DataID.ToString() + " " + (fd != null && fd->IsVisible).ToString() + " " + QuestEventHandler->IsAcceptEvent(Svc.Objects.CreateObjectReference((nint)obj.Value)) + " " + ((ulong)(obj.Value->GetObjectID())).ToString("X"));
                                 }
                             }
                         }
-                        catch (Exception e)
-                        {
-                            LogHelper.Error(e.ToString());
-                        }
-                        finally
-                        {
-                            ImGui.TreePop();
-                        }
-                    }
+                    });
                     if (ImGui.TreeNode($"TodoLocation###t{Quest.Name}"))
                     {
                         foreach (var todo in Quest.TodoParams)
@@ -233,16 +218,18 @@ namespace AutoQuest
             try
             {
                 ImGui.Text($"Start {Svc.Data.GetExcelSheet<ENpcResident>().GetRow(Quest.IssuerStart.Row).Singular}#{Quest.IssuerStart.Row} {Quest.IssuerLocation.Value.Info()}");
-                foreach (var SeqMessages in Quest.QuestTodoMessages.Where(s => s.Value.Value.ToString() != ""))
+                using (var indent1 = new ImGuiIndent(20))
                 {
-                    var seq = SeqMessages.Value.Variable.ToString().Split('_').Last().ToNumber();
-                    ImGui.Text($"{seq} - 0xFF  {SeqMessages.Value.Value}");
+                    foreach (var SeqMessages in Quest.QuestTodoMessages.Where(s => s.Value.Value.ToString() != ""))
                     {
-                        var loc = Quest.TodoParams.Where(t => t.ToDoCompleteSeq == (seq + 1) || (MaxSeq == (seq+1) && t.ToDoCompleteSeq == 0xff)).First();
+                        var seq = SeqMessages.Value.Variable.ToString().Split('_').Last().ToNumber();
+                        ImGui.Text($"{seq} - 0xFF  {SeqMessages.Value.Value}");
+                        using var indent2 = new ImGuiIndent(20);
+                        var loc = Quest.TodoParams.Where(t => t.ToDoCompleteSeq == (seq + 1) || (MaxSeq == (seq + 1) && t.ToDoCompleteSeq == 0xff)).First();
                         var i = 0;
                         foreach (var Msg in Quest.QuestListenerParams.Where(l => (l.ActorSpawnSeq == (seq + 1) || (l.ActorSpawnSeq == 0XFF && MaxSeq == (seq + 1))) && l.ActorDespawnSeq != 0xff && l.Listener != 5020000))
                         {
-                            ImGui.Text($"    {new QuestListenerString(Msg, Quest.QuestParams.Where(s => s.ScriptInstruction.ToString().Contains("INSTANCEDUNGEON")).FirstOrDefault().ScriptArg)} {loc.ToDoLocation[i++].Value.Info()}");
+                            ImGui.Text($"{new QuestListenerString(Msg, Quest.QuestParams.Where(s => s.ScriptInstruction.ToString().Contains("INSTANCEDUNGEON")).FirstOrDefault().ScriptArg)} {loc.ToDoLocation[i++].Value.Info()}");
                         }
                     }
                 }
@@ -276,6 +263,18 @@ namespace AutoQuest
                     draw.Invoke();
                 }
             }
+        }
+    }
+    public class ImGuiIndent : IDisposable
+    {
+        public ImGuiIndent(float indent_w)
+        {
+            ImGui.Indent(indent_w);
+        }
+
+        public void Dispose()
+        {
+            ImGui.Unindent();
         }
     }
 }
