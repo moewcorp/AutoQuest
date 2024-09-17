@@ -40,6 +40,7 @@ namespace AutoQuest.Extension
 
         public static bool IsRange(this ListenerType value) => value == ListenerType.Range;
         public static bool IsRange(this uint listener) => GetListenerType(listener).IsRange();
+        public static bool IsActor(this uint listener) => listener > 1000000 && listener < 2000000;
         public static bool IsQuestEvent(this uint EventId)
         {
             return EventId > 0x10000 && EventId < 0x20000;

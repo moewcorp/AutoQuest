@@ -232,10 +232,11 @@ namespace AutoQuest
         {
             try
             {
+                ImGui.Text($"Start {Svc.Data.GetExcelSheet<ENpcResident>().GetRow(Quest.IssuerStart.Row).Singular}#{Quest.IssuerStart.Row} {Quest.IssuerLocation.Value.Info()}");
                 foreach (var SeqMessages in Quest.QuestTodoMessages.Where(s => s.Value.Value.ToString() != ""))
                 {
                     var seq = SeqMessages.Value.Variable.ToString().Split('_').Last().ToNumber();
-                    ImGui.Text($"{seq} - 0xFF {MaxSeq} {SeqMessages.Value.Value}");
+                    ImGui.Text($"{seq} - 0xFF  {SeqMessages.Value.Value}");
                     {
                         var loc = Quest.TodoParams.Where(t => t.ToDoCompleteSeq == (seq + 1) || (MaxSeq == (seq+1) && t.ToDoCompleteSeq == 0xff)).First();
                         var i = 0;

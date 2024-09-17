@@ -34,6 +34,7 @@ namespace AutoQuest
             SkipManager.Instance.Dispose();
             TaskManager.Instance.Dispose();
             Svc.PluginInterface.UiBuilder.Draw -= DrawEntrySetting;
+            ECommonsMain.Dispose();
         }
         private bool Show = true;
         public void DrawEntrySetting()

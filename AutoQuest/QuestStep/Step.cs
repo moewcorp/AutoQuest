@@ -1,11 +1,14 @@
 
+using AutoQuest.Extension;
 using Dalamud.Game.ClientState.Objects.Types;
 using ECommons.DalamudServices;
 using ECommons.GameFunctions;
 using FFXIVClientStructs.FFXIV.Client.Game;
+using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using Lumina.Excel.GeneratedSheets2;
 using QuestResolve.QuestStep;
 using System.Numerics;
+using static Dalamud.Interface.Utility.Raii.ImRaii;
 
 namespace AutoQuest.QuestStep
 {
@@ -50,8 +53,8 @@ namespace AutoQuest.QuestStep
             Cancel();
             base.Dispose(disposing);
         }
-        public static IStep CreateMovePostion(Vector3 pos, bool fly,Func<Task<bool>, bool> next) => new Step(StepType.MovePostion, cts => Move.MoveControl.Instance.Move(pos, fly,false, cts), next);
-        public static IStep CreateMovePostion(Level pos, bool fly, Func<Task<bool>, bool> next) => CreateMovePostion(new Vector3(pos.X, pos.Y, pos.Z), fly, next);
+        public static IStep CreateMovePostion(Vector3 pos, bool fly,bool realPos, Func<Task<bool>, bool> next) => new Step(StepType.MovePostion, cts => Move.MoveControl.Instance.Move(pos, fly, realPos, cts), next);
+        public static IStep CreateMovePostion(Level pos, bool fly, Func<Task<bool>, bool> next) => CreateMovePostion(new Vector3(pos.X, pos.Y, pos.Z), fly, pos.Object.Row.IsActor(), next);
         public static IStep CreateMoveTarget(GameObject Target, bool fly) => new Step(StepType.MoveTarget, cts => Move.MoveControl.Instance.Move(Target.Position, fly, true, cts), res => res.IsCompletedSuccessfully);
         public unsafe static IStep CreateUseEventItem(uint item, GameObject target) => new Step(StepType.EventItem, cts =>
         {
@@ -72,9 +75,18 @@ namespace AutoQuest.QuestStep
         }, res => res.IsCompletedSuccessfully);
         public unsafe static IStep CreateTeleport(uint territoryId, Vector3 pos) => new Step(StepType.MovePostion, cts => Task.Run(() =>
         {
-            //var ret = Core.Get<IMemoryAPITeleport>().Teleport(territoryId, pos);
+            var ret = false;
+            foreach (var aetheryte in Svc.Data.GetExcelSheet<Aetheryte>()!.Where(ae => ae.Territory.Row == territoryId && ae.IsAetheryte)
+            .Select(ae=> Svc.Data.GetExcelSheet<MapMarker>().First(ma => ma.DataType == 3 && ma.DataKey.Row == ae.RowId))
+            .OrderBy(mm=>new Vector2(mm.X-pos.X,mm.Y-pos.Z).Length()))
+            {
+                if (aetheryte.DataKey.Row != 0 && (ret = Telepo.Instance()->Teleport(aetheryte.DataKey.Row, 0)))
+                {
+                    break;
+                }
+            }
             Task.Delay(1000).Wait();
-            return false;
+            return ret;
         }, cts.Token), res => Svc.ClientState.TerritoryType == territoryId);
         public unsafe static IStep CreateEnemy(GameObject obj,QuestWrapper quest,uint id) => new Step(StepType.MovePostion, cts => Task.Run(() =>
         {
