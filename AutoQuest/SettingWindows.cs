@@ -51,6 +51,7 @@ namespace AutoQuest
                 {
                     AutoQuestManager.Instance.Quests.Clear();
                     AutoQuestManager.Instance.Step?.Cancel();
+                    AutoQuestManager.Instance.Step = null;
                 }
                 //ImGui.SameLine();
                 //if (ImGui.Button("EventAction"))

@@ -28,6 +28,7 @@ namespace AutoQuest
                 }
                 if (quest.TryGetTask(out var t))
                 {
+                    Step?.Cancel();
                     Step = t.Start();
                 }
             }

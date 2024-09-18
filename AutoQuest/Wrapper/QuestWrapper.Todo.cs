@@ -1,8 +1,11 @@
 using AutoQuest.QuestStep;
+using AutoQuest.Struct;
+using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.ClientState.Objects.Types;
 using ECommons;
 using ECommons.DalamudServices;
 using FFXIVClientStructs.FFXIV.Client.Game;
+using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using Lumina.Excel.GeneratedSheets2;
 using QuestResolve.QuestStep;
 using System.Diagnostics.CodeAnalysis;
@@ -41,7 +44,7 @@ namespace AutoQuest
                     todo = Step.CreateTeleport(todod.level.Territory.Value.RowId, new System.Numerics.Vector3(todod.level.X, todod.level.Y, todod.level.Z));
                     return true;
                 }
-                if (QuestEventHandler->IsBattleNpcOwner())
+                if (QuestEventHandler != null && QuestEventHandler->IsBattleNpcOwner())
                 {
                     foreach (var oss in Quest.QuestParams.Where(s => s.ScriptInstruction.ToString().Contains("ENEMY")))
                     {
@@ -56,7 +59,7 @@ namespace AutoQuest
                 {
                     if ((obj.Position - Svc.ClientState.LocalPlayer.Position).Length() > 3)
                     {
-                        todo = Step.CreateMoveTarget(obj, (new Vector3(todod.level.X, todod.level.Y, todod.level.Z) - Svc.ClientState.LocalPlayer.Position).Length() > 25);
+                        todo = Step.CreateMoveTarget(obj, (new Vector3(todod.level.X, todod.level.Y, todod.level.Z) - Svc.ClientState.LocalPlayer.Position).Length() > 25 && CanFly());
                         return true;
                     }
                     else
@@ -109,7 +112,7 @@ namespace AutoQuest
                 }
                 else
                 {
-                    todo = Step.CreateMovePostion(todod.level,(new Vector3(todod.level.X, todod.level.Y, todod.level.Z)-Svc.ClientState.LocalPlayer.Position).Length() > 25,res => FindObjectWithDataIdInMemory(todod.obj, out var obj));
+                    todo = Step.CreateMovePostion(todod.level, (new Vector3(todod.level.X, todod.level.Y, todod.level.Z) - Svc.ClientState.LocalPlayer.Position).Length() > 25 && CanFly(), res => false);//FindObjectWithDataIdInMemory(todod.obj, out var obj));未接受任务会闪退 有时间看看啥原因
                     return true;
                 }
             }
@@ -240,6 +243,12 @@ namespace AutoQuest
                 }
             }
             return false;
+        }
+        private static nint UnkInstance => Svc.SigScanner.GetStaticAddressFromSig("48 ?? ?? ?? ?? ?? ?? 0F ?? ?? F3 0F 11 77");
+        private static nint fpCanFlyCurTer => Svc.SigScanner.ScanText("E8 ?? ?? ?? ?? 84 ?? 75 ?? F3 ?? ?? ?? ?? ?? ?? ?? 0F ?? ?? 0F ?? ?? 7A ?? 74");
+        public static unsafe bool CanFly()
+        {
+            return ((delegate* unmanaged[Stdcall]<nint, bool>)fpCanFlyCurTer)(UnkInstance);
         }
     }
 }
