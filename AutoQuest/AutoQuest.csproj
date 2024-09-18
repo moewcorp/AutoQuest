@@ -16,6 +16,11 @@
 	  <PackageReference Include="DalamudPackager" Version="2.1.13" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <ProjectReference Include="..\SaintCoinach\SaintCoinach\SaintCoinach.csproj" />
+	  <ProjectReference Include="..\Unluac\Unluac.csproj" />
+	</ItemGroup>
+
   <ItemGroup>
     <Reference Include="Dalamud">
       <HintPath>$(DalamudLibPath)Dalamud.dll</HintPath>
@@ -46,14 +51,6 @@
       <HintPath>$(DalamudLibPath)Lumina.Excel.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="SaintCoinach">
-      <HintPath>..\References\SaintCoinach.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unluac">
-      <HintPath>..\References\Unluac.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
 	<None Update="AutoQuest.json">
@@ -62,7 +59,5 @@
   </ItemGroup>
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
 	  <Copy SourceFiles="$(SolutionDir)References\ECommons.dll" DestinationFolder="$(TargetDir)" />
-		<Copy SourceFiles="$(SolutionDir)References\Unluac.dll" DestinationFolder="$(TargetDir)" />
-		<Copy SourceFiles="$(SolutionDir)References\SaintCoinach.dll" DestinationFolder="$(TargetDir)" />
 	</Target>
 </Project>

@@ -1,0 +1,6 @@
+[submodule "Unluac"]
+	path = Unluac
+	url = https://github.com/sbago/UnluacNET
+[submodule "SaintCoinach"]
+	path = SaintCoinach
+	url = https://github.com/xivapi/SaintCoinach
