@@ -8,7 +8,6 @@ using Lumina.Excel.GeneratedSheets2;
 using QuestResolve;
 using System.Numerics;
 using System.Runtime.InteropServices;
-using static AutoQuest.QuestEntry;
 
 namespace AutoQuest
 {
@@ -16,6 +15,7 @@ namespace AutoQuest
     {
         private bool curs;
         private bool seq;
+        private bool ShowIsAnnounce;
         public unsafe void Draw()
         {
             if (ImGui.TreeNode($"{Quest.Name} {QuestId} {CurrentSeq} {(long)QuestEventHandler:X}### q{Quest.Name}"))
@@ -61,12 +61,14 @@ namespace AutoQuest
                             {
                                 foreach (var b in a.Item2)
                                 {
-                                    ImGui.Text($"seq:{a.Item1} v:{b}");
+                                    ImGui.Text($"seq:{a.Item1.ToString("X").PadLeft(2,'0')} v:{b}");
                                 }
                             }
                             foreach (var obj in QuestEventHandler->LuaEventHandler.EventHandler.EventObjects)
                             {
-                                if (curs && Quest.QuestListenerParams.Where(x => x.Listener != 0 && x.ActorSpawnSeq != CurrentSeq).Any(x => x.Listener == obj.Value->DataID))
+                                if (curs && !Quest.QuestListenerParams.Where(x => x.Listener != 0 && x.ActorSpawnSeq == CurrentSeq).Any(x => x.Listener == obj.Value->DataID))
+                                    continue;
+                                if (seq && Quest.QuestListenerParams.Where(x => x.Listener != 0 && x.ActorSpawnSeq == CurrentSeq && x.ActorDespawnSeq == 0xff).Any(x => x.Listener == obj.Value->DataID))
                                     continue;
                                 var o = Svc.Objects.CreateObjectReference((nint)obj.Value);
                                 if (o == null)
@@ -110,6 +112,8 @@ namespace AutoQuest
                         ImGui.Checkbox($"ShowCurSeq###qlch{Quest.Name}", ref curs);
                         ImGui.SameLine();
                         ImGui.Checkbox($"ShowDeSpawnSeq###qldd{Quest.Name}", ref seq);
+                        ImGui.SameLine();
+                        ImGui.Checkbox($"ShowIsAnnounce###qlia{Quest.Name}", ref ShowIsAnnounce);
                         if (TryTodo(out var todo))
                         {
                             ImGui.SameLine();
@@ -124,7 +128,6 @@ namespace AutoQuest
                             }
 
                         }
-                        var j = 1;
                         for (var i = 0u; i < 64; i++)
                         {
                             var Listener = Quest.QuestListenerParams[i];
@@ -133,6 +136,8 @@ namespace AutoQuest
                             if (seq && Listener.ActorDespawnSeq == 0xff)
                                 continue;
                             if (Listener.Listener == 0)
+                                continue;
+                            if (ShowIsAnnounce && !QuestEventHandler->IsAnnounce(Listener))
                                 continue;
                             //if (this.a())
                             {
@@ -226,11 +231,11 @@ namespace AutoQuest
                     foreach (var SeqMessages in Quest.QuestTodoMessages.Where(s => s.Value.Value.ToString() != ""))
                     {
                         var seq = SeqMessages.Value.Variable.ToString().Split('_').Last().ToNumber();
-                        ImGui.Text($"{seq} - 0xFF  {SeqMessages.Value.Value}");
-                        using var indent2 = new ImGuiIndent(20);
                         var loc = Quest.TodoParams.Where(t => t.ToDoCompleteSeq == (seq + 1) || (MaxSeq == (seq + 1) && t.ToDoCompleteSeq == 0xff)).First();
                         var i = 0;
                         var lis = Quest.QuestListenerParams.Where(l => (l.ActorSpawnSeq == (seq + 1) || (l.ActorSpawnSeq == 0XFF && MaxSeq == (seq + 1))) && l.ActorDespawnSeq != 0xff);
+                        ImGui.Text($"{loc.ToDoCompleteSeq} - 0xFF  {SeqMessages.Value.Value}");
+                        using var indent2 = new ImGuiIndent(20);
                         foreach (var Msg in lis)
                         {
                             //if (Msg.Listener != 5020000 || (lis.Count() == 1 && loc.ToDoLocation[i].Value != null))
