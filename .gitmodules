@@ -4,3 +4,6 @@
 [submodule "SaintCoinach"]
 	path = SaintCoinach
 	url = https://github.com/xivapi/SaintCoinach
+[submodule "ECommons"]
+	path = ECommons
+	url = https://github.com/moewcorp/ECommons

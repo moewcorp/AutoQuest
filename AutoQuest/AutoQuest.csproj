@@ -17,6 +17,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <ProjectReference Include="..\ECommons\ECommons\ECommons.csproj" />
 	  <ProjectReference Include="..\SaintCoinach\SaintCoinach\SaintCoinach.csproj" />
 	  <ProjectReference Include="..\Unluac\Unluac.csproj" />
 	</ItemGroup>
@@ -25,11 +26,6 @@
     <Reference Include="Dalamud">
       <HintPath>$(DalamudLibPath)Dalamud.dll</HintPath>
       <Private>False</Private>
-    </Reference>
-    <Reference Include="ECommons">
-      <HintPath>..\References\ECommons.dll</HintPath>
-      <Private>False</Private>
-
     </Reference>
     <Reference Include="FFXIVClientStructs">
       <HintPath>$(DalamudLibPath)FFXIVClientStructs.dll</HintPath>
