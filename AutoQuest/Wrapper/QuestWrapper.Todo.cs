@@ -10,6 +10,7 @@ using Lumina.Excel.GeneratedSheets2;
 using QuestResolve.QuestStep;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 
 namespace AutoQuest
@@ -27,7 +28,7 @@ namespace AutoQuest
                 {
                     foreach (var item in Quest.PreviousQuest.Select(q => QuestWrapper.GetQuestById(q.Row)))
                     {
-                        if(!item.IsComplete)
+                        if (!item.IsComplete)
                             return false;
                     }
                     return true;
@@ -35,11 +36,11 @@ namespace AutoQuest
             }
             return false;
         }
-        public unsafe bool TryGetTask([NotNullWhen(true)]out IStep? todo)
+        public unsafe bool TryGetTask([NotNullWhen(true)] out IStep? todo)
         {
-            if(TryTodo(out var todod))
+            if (TryTodo(out var todod))
             {
-                if(todod.level.Territory.Value.RowId != Svc.ClientState.TerritoryType)
+                if (todod.level.Territory.Value.RowId != Svc.ClientState.TerritoryType)
                 {
                     todo = Step.CreateTeleport(todod.level.Territory.Value.RowId, new System.Numerics.Vector3(todod.level.X, todod.level.Y, todod.level.Z));
                     return true;
@@ -50,7 +51,7 @@ namespace AutoQuest
                     {
                         if (FindObjectWithLayoutIDInMemory(oss.ScriptArg, out var PP))
                         {
-                            todo = Step.CreateEnemy(PP,this, oss.ScriptArg);
+                            todo = Step.CreateEnemy(PP, this, oss.ScriptArg);
                             return true;
                         }
                     }
@@ -59,7 +60,7 @@ namespace AutoQuest
                 {
                     if ((obj.Position - Svc.ClientState.LocalPlayer.Position).Length() > 3)
                     {
-                        todo = Step.CreateMoveTarget(obj, (new Vector3(todod.level.X, todod.level.Y, todod.level.Z) - Svc.ClientState.LocalPlayer.Position).Length() > 25 && CanFly());
+                        todo = Step.CreateMoveTarget(obj, (new Vector3(todod.level.X, todod.level.Y, todod.level.Z) - Svc.ClientState.LocalPlayer.Position).Length() > 25 && todod.level.Territory.Value.Mount);
                         return true;
                     }
                     else
@@ -81,7 +82,7 @@ namespace AutoQuest
                             //}
                             //else
                             {
-                                if(Quest.QuestListenerParams.Where(q=>q.Listener == todod.obj).TryGetFirst(q=>q.QuestUInt8A == 8,out var lis))
+                                if (Quest.QuestListenerParams.Where(q => q.Listener == todod.obj).TryGetFirst(q => q.QuestUInt8A == 8, out var lis))
                                 {
                                     var eventItem = QuestEventHandler->GetEventItems();
                                     if (eventItem.Count != 0)
@@ -98,7 +99,7 @@ namespace AutoQuest
                                 }
                                 else
                                 {
-                                    if (TryGetSayEvent(todod.obj,CurrentSeq,obj,out var str))
+                                    if (TryGetSayEvent(todod.obj, CurrentSeq, obj, out var str))
                                     {
                                         todo = Step.CreateSay($"/s {str}");
                                         return true;
@@ -112,14 +113,14 @@ namespace AutoQuest
                 }
                 else
                 {
-                    todo = Step.CreateMovePostion(todod.level, (new Vector3(todod.level.X, todod.level.Y, todod.level.Z) - Svc.ClientState.LocalPlayer.Position).Length() > 25 && CanFly(), res => false);//FindObjectWithDataIdInMemory(todod.obj, out var obj));未接受任务会闪退 有时间看看啥原因
+                    todo = Step.CreateMovePostion(todod.level, (new Vector3(todod.level.X, todod.level.Y, todod.level.Z) - Svc.ClientState.LocalPlayer.Position).Length() > 25 && todod.level.Territory.Value.Mount, res => false);//FindObjectWithDataIdInMemory(todod.obj, out var obj));未接受任务会闪退 有时间看看啥原因
                     return true;
                 }
             }
             todo = null;
             return false;
         }
-        public bool TryGetTodoLevelsAndListenersByCurrentSeq(out List<Level> levels,out List<uint> listeners)
+        public bool TryGetTodoLevelsAndListenersByCurrentSeq(out List<Level> levels, out List<uint> listeners)
         {
             levels = new List<Level>();
             listeners = new List<uint>();
@@ -133,28 +134,28 @@ namespace AutoQuest
             {
                 foreach (var todo in Quest.TodoParams)
                 {
-                    if(todo.ToDoCompleteSeq == seq)
+                    if (todo.ToDoCompleteSeq == seq)
                     {
                         foreach (var l in todo.ToDoLocation)
                         {
                             if (l.Value != null)
                             {
                                 levels.Add(l.Value);
-                            }    
+                            }
                         }
                     }
                 }
             }
-            foreach(var lis in Quest.QuestListenerParams)
+            foreach (var lis in Quest.QuestListenerParams)
             {
-                if(lis.ActorSpawnSeq == seq && lis.Listener != 0)
+                if (lis.ActorSpawnSeq == seq && lis.Listener != 0)
                 {
                     listeners.Add(lis.Listener);
                 }
             }
             return levels.Count > 0 && listeners.Count > 0;
         }
-        public unsafe bool TryGetSayEvent(uint obj,byte seq,GameObject gameObject, out string str)
+        public unsafe bool TryGetSayEvent(uint obj, byte seq, GameObject gameObject, out string str)
         {
             if (Quest.QuestListenerParams.Where(q => q.Listener == obj).Any(q => q.QuestUInt8A == 23) && DecompileCode.Value.TryGetValue("IsAcceptSayEvent", out var f))
             {
@@ -172,8 +173,8 @@ namespace AutoQuest
                             var objreg = Regex.Match(seqstr, pobj);
                             if (f.Code.TryGetValue(s.Key - 2, out seqstr) && seqstr != null)
                             {
-                                if(!regseq.Success) regseq = Regex.Match(seqstr, pseq);
-                                if(!objreg.Success) objreg = Regex.Match(seqstr, pobj);
+                                if (!regseq.Success) regseq = Regex.Match(seqstr, pseq);
+                                if (!objreg.Success) objreg = Regex.Match(seqstr, pobj);
                             }
                             if (regseq.Success && uint.Parse(regseq.Groups[1].Value) != seq)
                             {
@@ -201,22 +202,22 @@ namespace AutoQuest
             {
                 if ((q.QuestId | 0x10000u) == QuestId)
                 {
-                    for (var i = 0 ; i < 8; i ++ )
+                    for (var i = 0; i < 8; i++)
                     {
                         if ((q.Variables[5] & (1 << (7 - i))) == 0)
                         {
-                            todo.level = Quest.TodoParams.First(t=>t.ToDoCompleteSeq == CurrentSeq).ToDoLocation[i].Value!;
-                            todo.obj = todo.level.Object.Row != 0 ? todo.level.Object.Row : Quest.QuestListenerParams.Where(x=>x.ActorSpawnSeq == CurrentSeq && x.ActorDespawnSeq != 0xff).ToArray()[i].Listener;
+                            todo.level = Quest.TodoParams.First(t => t.ToDoCompleteSeq == CurrentSeq).ToDoLocation[i].Value!;
+                            todo.obj = todo.level.Object.Row != 0 ? todo.level.Object.Row : Quest.QuestListenerParams.Where(x => x.ActorSpawnSeq == CurrentSeq && x.ActorDespawnSeq != 0xff).ToArray()[i].Listener;
                             return true;
                         }
                     }
                 }
             }
-            if(CurrentSeq == 0)
+            if (CurrentSeq == 0)
             {
                 todo = (Quest.IssuerLocation.Value, Quest.IssuerLocation.Value.Object.Row);
                 return true;
-            }    
+            }
             todo = (null, 0);
             return false;
         }
@@ -224,7 +225,7 @@ namespace AutoQuest
         {
             get
             {
-                foreach(var item in QuestManager.Instance()->NormalQuestsSpan)
+                foreach (var item in QuestManager.Instance()->NormalQuestsSpan)
                 {
                     if ((item.QuestId | 0x10000u) == QuestId)
                         return item.Sequence;
@@ -244,11 +245,21 @@ namespace AutoQuest
             }
             return false;
         }
-        private static nint UnkInstance => Svc.SigScanner.GetStaticAddressFromSig("48 ?? ?? ?? ?? ?? ?? 0F ?? ?? F3 0F 11 77");
-        private static nint fpCanFlyCurTer => Svc.SigScanner.ScanText("E8 ?? ?? ?? ?? 84 ?? 75 ?? F3 ?? ?? ?? ?? ?? ?? ?? 0F ?? ?? 0F ?? ?? 7A ?? 74");
-        public static unsafe bool CanFly()
+        //global 80 3D ?? ?? ?? ?? ?? 75 ?? B8 ?? ?? ?? ?? 48 ?? ?? ?? 5B C3
+        private static unsafe bool* CurTerritoryTypeCanFlyFlag => (bool*)Svc.SigScanner.GetStaticAddressFromSig("80 3D ?? ?? ?? ?? ?? 75 ?? B8 ?? ?? ?? ?? E9");
+        public static unsafe bool CurTerritoryTypeCanFly
         {
-            return ((delegate* unmanaged[Stdcall]<nint, bool>)fpCanFlyCurTer)(UnkInstance);
+            get
+            {
+                return Svc.Data.GetExcelSheet<TerritoryType>().GetRow(Svc.ClientState.TerritoryType).Mount && *CurTerritoryTypeCanFlyFlag;
+            }
+            set
+            {
+                if(Svc.Data.GetExcelSheet<TerritoryType>().GetRow(Svc.ClientState.TerritoryType).Mount)
+                {
+                    *CurTerritoryTypeCanFlyFlag = value;
+                }
+            }
         }
     }
 }

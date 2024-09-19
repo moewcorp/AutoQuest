@@ -1,6 +1,8 @@
+using ECommons.DalamudServices;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using ImGuiNET;
+using Lumina.Excel.GeneratedSheets2;
 using System.Diagnostics;
 
 namespace AutoQuest
@@ -53,16 +55,7 @@ namespace AutoQuest
                     AutoQuestManager.Instance.Step?.Cancel();
                     AutoQuestManager.Instance.Step = null;
                 }
-                //ImGui.SameLine();
-                //if (ImGui.Button("EventAction"))
-                //{
-                //    ActionManager.Instance()->UseAction(ActionType.KeyItem, 2003119, Svc.Targets.Target.Struct()->GetObjectID());
-                //}
-                //ImGui.SameLine();
-                //if (ImGui.Button("StartEvent") && ca != null)
-                //{
-                //    new VoidEvent((FFXIVClientStructs.FFXIV.Client.Game.Event.EventHandler*)ca.QuestEventHandler).EventStart(Svc.Targets.Target.Struct()->GetObjectID());
-                //}
+                ImGui.Text(QuestWrapper.CurTerritoryTypeCanFly.ToString());
             }
             catch (Exception e)
             {

@@ -139,7 +139,6 @@ namespace AutoQuest
                                 continue;
                             if (ShowIsAnnounce && !QuestEventHandler->IsAnnounce(Listener))
                                 continue;
-                            //if (this.a())
                             {
                                 var str = i.ToString().PadLeft(2, '0');
                                 foreach (var s in Listener.GetPropertyNameAndValueString().Select(s => s + " "))
@@ -148,17 +147,13 @@ namespace AutoQuest
                                 ImGui.Text(QuestEventHandler->IsAcceptEvent(Listener).ToString() + " " + QuestEventHandler->IsAnnounce(Listener).ToString() + QuestEventHandler->IsQualified(Listener));
                                 if (Listener.Listener == 5000000)
                                 {
-                                    //var obj = GameFunction.GetRangeData(Listener.ConditionValue);
                                     var range = Svc.Data.GetExcelSheet<Level>().GetRow(Listener.ConditionValue);
                                     if (range != null)
-                                    //if (obj != nint.Zero)
                                     {
                                         ImGui.Text(QuestEventHandler->IsInEventRange(Listener.ConditionValue).ToString() + " " + range.Territory.Value.PlaceName.Value.Name +(new Vector3(range.X,range.Y,range.Z)).ToString());
                                     }
                                 }
                             }
-                            //else
-                            //    ImGui.Text(i.ToString().PadLeft(2, '0') + ":" + $"Listener:{Listener.Listener:D7} SpawnSeq:{Listener.ActorSpawnSeq} DespawnSeq:{Listener.ActorDespawnSeq} ConditionValue:{Listener.ConditionValue} ConditionType:{Listener.ConditionType} QualifiedBool:{Listener.QualifiedBool} QuestUInt8A:{Listener.QuestUInt8A}");
                         }
                         ImGui.TreePop();
                     }
