@@ -3,6 +3,7 @@ using AutoQuest.Lua.MemberFunction;
 using Dalamud.Game.ClientState.Objects.Types;
 using ECommons.DalamudServices;
 using ECommons.GameFunctions;
+using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.System.Resource.Handle;
 using FFXIVClientStructs.FFXIV.Client.System.String;
 using FFXIVClientStructs.Interop;
@@ -19,6 +20,7 @@ namespace AutoQuest.Struct
     [StructLayout(LayoutKind.Explicit, Size = 0x610)]
     internal unsafe struct QuestEventHandler
     {
+        [FieldOffset(0x00)] public FFXIVClientStructs.FFXIV.Client.Game.Event.QuestEventHandler FCSQuestEventHandler;
         [FieldOffset(0x00)] public long* vtbls;
         [FieldOffset(0x00)] public LuaEventHandler LuaEventHandler;
         [FieldOffset(0x338)] public uint QuestId;
@@ -29,7 +31,7 @@ namespace AutoQuest.Struct
         [FieldOffset(0x508)] public byte ListenersCount;
         #region Function
         public ICallMemberFunctionResult<TRet> CallMemberFunction<TRet>(string functionName, Lua_PushArg pushArg, ICallMemberFunctionResult<TRet> poplate) => LuaHelper.CallMemberFunction(LuaEventHandler.LuaState, LuaEventHandler.LuaKey.StringPtr, functionName, pushArg, poplate);
-        public TodoResult GetTodoArgs(byte seq) => CallMemberFunction("GetTodoArgs", state=>
+        public TodoResult GetTodoArgs(byte seq) => CallMemberFunction("GetTodoArgs", state =>
         {
             state->Old.lua_getfield(-10002, (Svc.ClientState.LocalPlayer as GameObject).Struct()->LuaActor->LuaString.StringPtr);
             state->lua_pushinteger(seq);
@@ -38,33 +40,54 @@ namespace AutoQuest.Struct
         /// kind dataid LayoutID unk1 0
         /// </summary>
         /// <returns></returns>
-        public bool IsAcceptEvent(GameObject obj) => CallMemberFunction("IsAcceptEvent", state =>
+        public bool IsAcceptEvent(GameObject obj)
         {
-            state->Old.lua_getfield(-10002, (Svc.ClientState.LocalPlayer as GameObject).Struct()->LuaActor->LuaString.StringPtr);
-            state->lua_pushinteger(obj.Struct()->GetObjectKind());
-            state->lua_pushinteger((int)obj.Struct()->DataID);
-            state->lua_pushinteger((int)obj.Struct()->LayoutID);
-            state->lua_pushinteger(1);
-            state->lua_pushinteger(0);
-        }, new BoolResult()).Value;
-        public bool IsAcceptEvent(QuestListenerParamsStruct listener) => CallMemberFunction("IsAcceptEvent", state =>
+            if (IsFunction("IsAcceptEvent"))
+            { 
+                return CallMemberFunction("IsAcceptEvent", state =>
+                {
+                    state->Old.lua_getfield(-10002, (Svc.ClientState.LocalPlayer as GameObject).Struct()->LuaActor->LuaString.StringPtr);
+                    state->lua_pushinteger(obj.Struct()->GetObjectKind());
+                    state->lua_pushinteger((int)obj.Struct()->DataID);
+                    state->lua_pushinteger((int)obj.Struct()->LayoutID);
+                    state->lua_pushinteger(1);
+                    state->lua_pushinteger(0);
+                }, new BoolResult()).Value;
+            }
+            return false;
+        }
+        public bool IsAcceptEvent(QuestListenerParamsStruct listener)
         {
-            state->Old.lua_getfield(-10002, (Svc.ClientState.LocalPlayer as GameObject).Struct()->LuaActor->LuaString.StringPtr);
-            state->lua_pushinteger(0);
-            state->lua_pushinteger((int)listener.Listener);
-            state->lua_pushinteger((int)listener.ConditionValue);
-            state->lua_pushinteger(listener.QuestUInt8A);
-            state->lua_pushinteger(0);
-        }, new BoolResult()).Value;
-        public bool IsAnnounce(QuestListenerParamsStruct listener) => CallMemberFunction("IsAnnounce", state =>
+            if (IsFunction("IsAcceptEvent"))
+            {
+                return CallMemberFunction("IsAcceptEvent", state =>
+                {
+                    state->Old.lua_getfield(-10002, (Svc.ClientState.LocalPlayer as GameObject).Struct()->LuaActor->LuaString.StringPtr);
+                    state->lua_pushinteger(0);
+                    state->lua_pushinteger((int)listener.Listener);
+                    state->lua_pushinteger((int)listener.ConditionValue);
+                    state->lua_pushinteger(listener.QuestUInt8A);
+                    state->lua_pushinteger(0);
+                }, new BoolResult()).Value;
+            }
+            return false;
+        }
+        public bool IsAnnounce(QuestListenerParamsStruct listener)
         {
-            state->Old.lua_getfield(-10002, (Svc.ClientState.LocalPlayer as GameObject).Struct()->LuaActor->LuaString.StringPtr);
-            state->lua_pushinteger(0);
-            state->lua_pushinteger((int)listener.Listener);
-            state->lua_pushinteger((int)listener.ConditionValue);
-            state->lua_pushinteger(listener.QuestUInt8A);
-            state->lua_pushinteger(0);
-        }, new BoolResult()).Value;
+            if (IsFunction("IsAnnounce"))
+            {
+                return CallMemberFunction("IsAnnounce", state =>
+                {
+                    state->Old.lua_getfield(-10002, (Svc.ClientState.LocalPlayer as GameObject).Struct()->LuaActor->LuaString.StringPtr);
+                    state->lua_pushinteger(0);
+                    state->lua_pushinteger((int)listener.Listener);
+                    state->lua_pushinteger((int)listener.ConditionValue);
+                    state->lua_pushinteger(listener.QuestUInt8A);
+                    state->lua_pushinteger(0);
+                }, new BoolResult()).Value;
+            }
+            return false;
+        }
         public bool IsEventItemUsable(GameObject obj, uint itemId) => CallMemberFunction("IsEventItemUsable", state => 
         {
             state->Old.lua_getfield(-10002, (Svc.ClientState.LocalPlayer as GameObject).Struct()->LuaActor->LuaString.StringPtr);
@@ -124,6 +147,11 @@ namespace AutoQuest.Struct
         {
             state->Old.lua_getfield(-10002, (Svc.ClientState.LocalPlayer as GameObject).Struct()->LuaActor->LuaString.StringPtr);
             state->lua_pushinteger((int)dd);
+        }, new BoolResult()).Value;
+        public bool IsTodoChecked(byte seq) => CallMemberFunction("IsTodoChecked", state =>
+        {
+            state->Old.lua_getfield(-10002, (Svc.ClientState.LocalPlayer as GameObject).Struct()->LuaActor->LuaString.StringPtr);
+            state->lua_pushinteger(seq);
         }, new BoolResult()).Value;
         public bool IsTargetingPossible(GameObject obj,bool notEobjAsTrue = true)
         {

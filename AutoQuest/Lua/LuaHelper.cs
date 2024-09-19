@@ -21,7 +21,7 @@ namespace AutoQuest.Lua
                 state->Old.lua_getfield(-1, functionName);
                 if (state->Old.lua_type(-1) != FFXIVClientStructs.FFXIV.Common.Lua.LuaType.Function)
                 {
-                    throw new Exception($"{functionName} not found");
+                    throw new LuaException($"{functionName} not found");
                 }
                 state->Old.lua_remove(top + 1);
                 state->Old.lua_getfield(-10002, baseOfFunction);
@@ -30,7 +30,7 @@ namespace AutoQuest.Lua
                 if (state->Old.lua_pcall(d - top - 1, -1, 0) != 0)
                 {
                     state->Old.luaB_tostring();
-                    throw new Exception($"call failed {state->Old.lua_tostring(-1)}");
+                    throw new LuaException($"call failed {state->Old.lua_tostring(-1)}");
                 }
                 var cnt = state->Old.lua_gettop() - top;
                 if(poplate is ICallMemberFunctionPoplate C)

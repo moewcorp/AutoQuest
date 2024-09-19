@@ -172,11 +172,12 @@ namespace AutoQuest
         [FieldOffset(0x44)] public uint unk8 = 0;
         [FieldOffset(0x48)] public uint unk9 = 0;
         [FieldOffset(0x4c)] public uint unk10 = 0;
-        public EventQuestCompleted(uint questId, ushort scene, uint count)
+        public EventQuestCompleted(uint questId, ushort scene, uint count, uint itemId = 0)
         {
             QuestId = questId;
             unk = 0x4000000u | scene;
             Count = count;
+            unk2 = itemId;
         }
     }
     [StructLayout(LayoutKind.Explicit)]

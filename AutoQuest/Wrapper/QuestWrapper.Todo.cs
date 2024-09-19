@@ -113,8 +113,26 @@ namespace AutoQuest
                 }
                 else
                 {
-                    todo = Step.CreateMovePostion(todod.level, (new Vector3(todod.level.X, todod.level.Y, todod.level.Z) - Svc.ClientState.LocalPlayer.Position).Length() > 25 && todod.level.Territory.Value.Mount, res => false);//FindObjectWithDataIdInMemory(todod.obj, out var obj));未接受任务会闪退 有时间看看啥原因
-                    return true;
+                    if (todod.obj == 5010000 && todod.type == 8)
+                    {
+                        if (Quest.QuestListenerParams.Where(q => q.Listener == todod.obj).TryGetFirst(q => q.QuestUInt8A == 8, out var lis))
+                        {
+                            var eventItem = QuestEventHandler->GetEventItems();
+                            if (eventItem.Count != 0)
+                            {
+                                foreach (var item in eventItem)
+                                {
+                                    todo = Step.CreateUseEventItem(item.ItemId,null);
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        todo = Step.CreateMovePostion(todod.level, (new Vector3(todod.level.X, todod.level.Y, todod.level.Z) - Svc.ClientState.LocalPlayer.Position).Length() > 25 && todod.level.Territory.Value.Mount, res => false);//FindObjectWithDataIdInMemory(todod.obj, out var obj));未接受任务会闪退 有时间看看啥原因
+                        return true;
+                    }
                 }
             }
             todo = null;
@@ -196,7 +214,7 @@ namespace AutoQuest
             str = "null";
             return false;
         }
-        public unsafe bool TryTodo(out (Level? level, uint obj) todo)
+        public unsafe bool TryTodo(out (Level? level, uint obj,byte type) todo)
         {
             foreach (var q in QuestManager.Instance()->NormalQuestsSpan)
             {
@@ -208,6 +226,7 @@ namespace AutoQuest
                         {
                             todo.level = Quest.TodoParams.First(t => t.ToDoCompleteSeq == CurrentSeq).ToDoLocation[i].Value!;
                             todo.obj = todo.level.Object.Row != 0 ? todo.level.Object.Row : Quest.QuestListenerParams.Where(x => x.ActorSpawnSeq == CurrentSeq && x.ActorDespawnSeq != 0xff).ToArray()[i].Listener;
+                            todo.type = Quest.QuestListenerParams.Where(x => x.ActorSpawnSeq == CurrentSeq && x.ActorDespawnSeq != 0xff).ToArray()[i].QuestUInt8A;
                             return true;
                         }
                     }
@@ -215,10 +234,10 @@ namespace AutoQuest
             }
             if (CurrentSeq == 0)
             {
-                todo = (Quest.IssuerLocation.Value, Quest.IssuerLocation.Value.Object.Row);
+                todo = (Quest.IssuerLocation.Value, Quest.IssuerLocation.Value.Object.Row,1);
                 return true;
             }
-            todo = (null, 0);
+            todo = (null, 0,0);
             return false;
         }
         public unsafe byte CurrentSeq

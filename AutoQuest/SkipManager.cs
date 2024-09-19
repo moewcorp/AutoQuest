@@ -1,6 +1,7 @@
 using AutoQuest.Extension;
 using Dalamud.Hooking;
 using ECommons.DalamudServices;
+using System.Runtime.InteropServices;
 
 namespace AutoQuest
 {
@@ -17,6 +18,19 @@ namespace AutoQuest
             OnEventAction.Enable();
             OnEventFinish = Svc.Hook.HookFromAddress(Svc.SigScanner.ScanText("40 ?? 55 41 ?? 41 ?? 41 ?? 48 ?? ?? ?? 33 ?? 45"), new EventFinishDelegate(OnEventFinishDetour));
             OnEventFinish.Enable();
+            Svc.GameNetwork.NetworkMessage += GameNetwork_NetworkMessage;
+        }
+
+        private void GameNetwork_NetworkMessage(nint dataPtr, ushort opCode, uint sourceActorId, uint targetActorId, Dalamud.Game.Network.NetworkMessageDirection direction)
+        {
+            if(direction == Dalamud.Game.Network.NetworkMessageDirection.ZoneUp)
+            {
+                if(opCode == 154)
+                {
+                    var a = Marshal.PtrToStructure<EventQuestCompleted>(dataPtr - 0x20);
+                    LogHelper.Info($"{a.Length} {a.Count} {a.unk2} {a.unk3} {a.unk4} {a.unk5} {a.unk6} {a.unk7} {a.unk8} {a.unk9} {a.unk10}");
+                }
+            }
         }
 
         public void Init()
@@ -31,6 +45,7 @@ namespace AutoQuest
         {
             if (eventId.IsQuestEvent())
             {
+                LogHelper.Info($"{eventId} {sence}");
                 var quest = QuestWrapper.GetQuestById(eventId);
                 if (quest != null)
                 {
@@ -49,7 +64,7 @@ namespace AutoQuest
                     }
                     else
                     {
-                        VoidEvent.SendPackt(new EventQuestCompleted(eventId, sence, 1));
+                        VoidEvent.SendPackt(new EventQuestCompleted(eventId, sence, 1, quest.Quest.OptionalItemReward[0].Value?.RowId ?? 0));
                         return;
                     }
                 }
@@ -61,6 +76,7 @@ namespace AutoQuest
         {
             OnEventAction?.Dispose();
             OnEventFinish?.Dispose();
+            Svc.GameNetwork.NetworkMessage -= GameNetwork_NetworkMessage;
         }
     }
 }

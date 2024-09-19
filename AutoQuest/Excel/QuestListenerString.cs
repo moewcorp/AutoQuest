@@ -39,6 +39,10 @@ namespace AutoQuest.Excel
                     }
                     return $"{(EventType)Type} {str}";
                 }
+                else if(Type == 8)
+                {
+                    return $"{(EventType)Type} 在指定区域使用指定物品";
+                }
                 return Content.ToString();
             }//5020000 可能是去某个地图
             else if (Listener == 5020000)
@@ -47,7 +51,7 @@ namespace AutoQuest.Excel
                 {
                     var terr = Svc.Data.GetExcelSheet<TerritoryType>().GetRow(TerritoryType);
                     return $"{(EventType)Type} {terr} {terr.PlaceName.Value.Name}";
-                }
+                } 
                 return "TerritoryType";
             }
             else if (Listener > 3000000)
