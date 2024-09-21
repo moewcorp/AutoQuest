@@ -224,9 +224,18 @@ namespace AutoQuest
                     {
                         if ((q.Variables[5] & (1 << (7 - i))) == 0)
                         {
-                            todo.level = Quest.TodoParams.First(t => t.ToDoCompleteSeq == CurrentSeq).ToDoLocation[i].Value!;
-                            todo.obj = todo.level.Object.Row != 0 ? todo.level.Object.Row : Quest.QuestListenerParams.Where(x => x.ActorSpawnSeq == CurrentSeq && x.ActorDespawnSeq != 0xff).ToArray()[i].Listener;
-                            todo.type = Quest.QuestListenerParams.Where(x => x.ActorSpawnSeq == CurrentSeq && x.ActorDespawnSeq != 0xff).ToArray()[i].QuestUInt8A;
+                            try
+                            {
+                                todo.level = Quest.TodoParams.Where(t => t.ToDoCompleteSeq == CurrentSeq).SelectMany(x=>x.ToDoLocation.Where(d=>d.Value != null && d.Value.RowId != 0)).ToArray()[i].Value!;
+                                todo.obj = todo.level.Object.Row != 0 ? todo.level.Object.Row : Quest.QuestListenerParams.Where(x => x.ActorSpawnSeq == CurrentSeq && x.ActorDespawnSeq != 0xff).ToArray()[i].Listener;
+                                todo.type = Quest.QuestListenerParams.Where(x => x.ActorSpawnSeq == CurrentSeq && x.ActorDespawnSeq != 0xff).ToArray()[i].QuestUInt8A;
+                            }
+                            catch(Exception ex)
+                            {
+                                LogHelper.Error($"{ex}");
+                                todo = (null, 0, 0);
+                                return false;
+                            }
                             return true;
                         }
                     }

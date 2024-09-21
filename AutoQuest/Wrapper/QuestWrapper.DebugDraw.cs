@@ -114,19 +114,26 @@ namespace AutoQuest
                         ImGui.Checkbox($"ShowDeSpawnSeq###qldd{Quest.Name}", ref seq);
                         ImGui.SameLine();
                         ImGui.Checkbox($"ShowIsAnnounce###qlia{Quest.Name}", ref ShowIsAnnounce);
-                        if (TryTodo(out var todo))
+                        try
                         {
-                            ImGui.SameLine();
-                            ImGui.Text($"{todo.level.Territory.Value.PlaceName.Value.Name} {new Vector3(todo.level.X, todo.level.Y, todo.level.Z)} {todo.level.Object.Row} {todo.obj}");
-                            ImGui.SameLine();
-                            if (ImGui.Button($"MoveTo###mov2{Quest.Name}"))
+                            if (TryTodo(out var todo))
                             {
-                                if (TryGetTask(out var ta))
+                                ImGui.SameLine();
+                                ImGui.Text($"{todo.level.Territory.Value.PlaceName.Value.Name} {new Vector3(todo.level.X, todo.level.Y, todo.level.Z)} {todo.level.Object.Row} {todo.obj}");
+                                ImGui.SameLine();
+                                if (ImGui.Button($"MoveTo###mov2{Quest.Name}"))
                                 {
-                                    ta.Start();
+                                    if (TryGetTask(out var ta))
+                                    {
+                                        ta.Start();
+                                    }
                                 }
-                            }
 
+                            }
+                        }
+                        catch(Exception ex)
+                        {
+                            LogHelper.Error(ex.ToString());
                         }
                         for (var i = 0u; i < 64; i++)
                         {
