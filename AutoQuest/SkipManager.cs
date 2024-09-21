@@ -51,15 +51,23 @@ namespace AutoQuest
                 {
                     if (!quest.IsQuestRewardScene(sence))   
                     {
-                        if (!quest.IsNpcTradeScene(sence))
+                        if (sence > 0 && quest.IsQuestRewardScene((ushort)(sence - 1)))
                         {
-                            VoidEvent.SendPackt(new EventStartQuest(eventId, sence));
+                            VoidEvent.SendPackt(new EventQuestCompleted(eventId, sence, quest.Quest.OptionalItemReward[0].Value?.RowId ?? 1,0));
                             return;
                         }
                         else
                         {
-                            VoidEvent.SendPackt(new EventQuestNpcTrade(eventId, sence, 1));
-                            return;
+                            if (!quest.IsNpcTradeScene(sence))
+                            {
+                                VoidEvent.SendPackt(new EventStartQuest(eventId, sence));
+                                return;
+                            }
+                            else
+                            {
+                                VoidEvent.SendPackt(new EventQuestNpcTrade(eventId, sence, 1));
+                                return;
+                            }
                         }
                     }
                     else

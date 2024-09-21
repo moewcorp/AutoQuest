@@ -111,6 +111,7 @@ namespace AutoQuest.Excel
     {
         None = 0,
         Normal = 1,
+        Emote = 2,
         RangeEnemy = 5,
         UseEventItem = 8,
         Enemy = 9,

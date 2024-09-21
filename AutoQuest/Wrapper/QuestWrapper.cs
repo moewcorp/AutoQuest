@@ -3,10 +3,12 @@ using ECommons.DalamudServices;
 using ECommons.GameFunctions;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
+using Lumina.Excel;
 using Lumina.Excel.GeneratedSheets2;
 using Lumina.Text;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
+using static Lumina.Excel.GeneratedSheets2.Quest;
 
 namespace AutoQuest
 {
@@ -100,6 +102,7 @@ namespace AutoQuest
         public string QuestMessagePath => Quest.MessagesPath;
         public string LuaFilePath => Quest.LuaFile.Path;
         public bool IsComplete => QuestManager.IsQuestComplete(QuestId);
+        public IEnumerable<(byte Seq,List<(QuestListenerParamsStruct Listener,LazyRow<Level> Level)> Info)> MainInfo => Quest.QuestListenerParams.Where(l => l.ActorDespawnSeq != 0xff).Zip(Quest.TodoParams.SelectMany(t => t.ToDoLocation.Where(t => t.Value != null && t.Value.RowId != 0).ToList())).GroupBy(e => e.First.ActorSpawnSeq).Select(g => (g.Key, g.ToList()));
         public byte GetMaxSeq()
         {
             var todo = Quest.TodoParams;

@@ -229,10 +229,10 @@ namespace AutoQuest
             {
                 ImGui.Text($"Start {Svc.Data.GetExcelSheet<ENpcResident>().GetRow(Quest.IssuerStart.Row).Singular}#{Quest.IssuerStart.Row} {Quest.IssuerLocation.Value.Info()}");
                 using var indent = new ImGuiIndent(20);
-                foreach (var (seq, lel) in Quest.QuestListenerParams.Where(l => l.ActorDespawnSeq != 0xff).Zip(Quest.TodoParams.SelectMany(t => t.ToDoLocation.Where(t => t.Value != null && t.Value.RowId != 0).ToList())).GroupBy(e => e.First.ActorSpawnSeq).Select(g => (g.Key, g.ToList())))
+                foreach (var (seq, lel) in MainInfo)
                 {
                     ImGui.Text($"{seq}");
-                    foreach (var lis in lel.Select(v => v.First.ActorDespawnSeq).ToHashSet())
+                    foreach (var lis in lel.Select(v => v.Listener.ActorDespawnSeq).ToHashSet())
                     {
                         ImGui.Text($"- {Quest.QuestTodoMessages[lis].Value.Value}");
                     }

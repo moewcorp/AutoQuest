@@ -54,7 +54,7 @@ namespace AutoQuest.QuestStep
             base.Dispose(disposing);
         }
         public static IStep CreateMovePostion(Vector3 pos, bool fly,bool realPos, Func<Task<bool>, bool> next) => new Step(StepType.MovePostion, cts => Move.MoveControl.Instance.Move(pos, fly, realPos, cts), next);
-        public static IStep CreateMovePostion(Level pos, bool fly, Func<Task<bool>, bool> next) => CreateMovePostion(new Vector3(pos.X, pos.Y, pos.Z), fly, pos.Object.Row.IsActor(), next);
+        public static IStep CreateMovePostion(Level pos, bool fly, Func<Task<bool>, bool> next) => CreateMovePostion(new Vector3(pos.X, pos.Y, pos.Z), fly, pos.Object.Row.IsActor() || pos.Object.Row == 5000000, next);
         public static IStep CreateMoveTarget(GameObject Target, bool fly) => new Step(StepType.MoveTarget, cts => Move.MoveControl.Instance.Move(Target.Position, fly, true, cts), res => res.IsCompleted);
         public unsafe static IStep CreateUseEventItem(uint item, GameObject? target) => new Step(StepType.EventItem, cts =>
         {
@@ -104,7 +104,13 @@ namespace AutoQuest.QuestStep
             Task.Delay(1000, cts.Token);
             return Task.FromResult(true);
         }, res => true);
-
+        public unsafe static IStep CreateEmote(Emote emote,GameObject? obj) => new Step(StepType.Emote, cts =>
+        {
+            Svc.Targets.Target = obj;
+            ECommons.Automation.Chat.Instance.SendMessage(emote.TextCommand.Value.Command.ToString());
+            Task.Delay(1000, cts.Token);
+            return Task.FromResult(true);
+        }, res => true);
         public IStep Start()
         {
             LogHelper.Info("start");
@@ -120,6 +126,7 @@ namespace AutoQuest.QuestStep
         Enemy,
         EventItem,
         InteractObject,
-        Say
+        Say,
+        Emote
     }
 }

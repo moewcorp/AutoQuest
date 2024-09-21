@@ -104,6 +104,21 @@ namespace AutoQuest
                                         todo = Step.CreateSay($"/s {str}");
                                         return true;
                                     }
+                                    var a = MainInfo.First(seq => seq.Seq == CurrentSeq).Info.First(x => x.Listener.Listener == todod.obj);
+                                    if (a.Listener.QuestUInt8A == 2)
+                                    {
+                                        var todostring = Quest.QuestTodoMessages[a.Listener.ActorDespawnSeq].Value.Value.ToString();
+                                        //cn only
+                                        var reg = Regex.Match(todostring, "¡°(.*?)¡±");
+                                        if (reg.Success)
+                                        {
+                                            if(Svc.Data.GetExcelSheet<Emote>().TryGetFirst(x=>x.Name == reg.Groups[1].Value,out var emote))
+                                            {
+                                                todo = Step.CreateEmote(emote, obj);
+                                                return true;
+                                            }
+                                        }
+                                    }
                                 }
                             }
                             todo = Step.CreateEventStart(this, obj);
@@ -226,9 +241,27 @@ namespace AutoQuest
                         {
                             try
                             {
-                                todo.level = Quest.TodoParams.Where(t => t.ToDoCompleteSeq == CurrentSeq).SelectMany(x=>x.ToDoLocation.Where(d=>d.Value != null && d.Value.RowId != 0)).ToArray()[i].Value!;
-                                todo.obj = todo.level.Object.Row != 0 ? todo.level.Object.Row : Quest.QuestListenerParams.Where(x => x.ActorSpawnSeq == CurrentSeq && x.ActorDespawnSeq != 0xff).ToArray()[i].Listener;
-                                todo.type = Quest.QuestListenerParams.Where(x => x.ActorSpawnSeq == CurrentSeq && x.ActorDespawnSeq != 0xff).ToArray()[i].QuestUInt8A;
+                                var info = MainInfo.First(info => info.Seq == CurrentSeq).Info[i]!;
+                                if (info.Listener.Listener == 5000000 && info.Listener.ConditionValue != 0)
+                                {
+                                    todo.level = Svc.Data.GetExcelSheet<Level>().GetRow(info.Listener.ConditionValue);
+                                }
+                                else
+                                {
+                                    todo.level = info.Level.Value;
+                                }
+                                if (todo.level?.Object.Row != 0)
+                                {
+                                    todo.obj = todo.level?.Object.Row ?? 0;
+                                }
+                                else
+                                {
+                                    todo.obj = info.Listener.Listener;
+                                }
+                                todo.type = info.Listener.QuestUInt8A;
+                                //todo.level = Quest.TodoParams.Where(t => t.ToDoCompleteSeq == CurrentSeq).SelectMany(x=>x.ToDoLocation.Where(d=>d.Value != null && d.Value.RowId != 0)).ToArray()[i].Value!;
+                                //todo.obj = todo.level.Object.Row != 0 ? todo.level.Object.Row : Quest.QuestListenerParams.Where(x => x.ActorSpawnSeq == CurrentSeq && x.ActorDespawnSeq != 0xff).ToArray()[i].Listener;
+                                //todo.type = Quest.QuestListenerParams.Where(x => x.ActorSpawnSeq == CurrentSeq && x.ActorDespawnSeq != 0xff).ToArray()[i].QuestUInt8A;
                             }
                             catch(Exception ex)
                             {
