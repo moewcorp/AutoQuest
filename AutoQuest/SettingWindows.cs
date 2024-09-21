@@ -55,6 +55,10 @@ namespace AutoQuest
                     AutoQuestManager.Instance.Step?.Cancel();
                     AutoQuestManager.Instance.Step = null;
                 }
+                if (ImGui.Button("Fly"))
+                {
+                    QuestWrapper.CurTerritoryTypeCanFly = true;
+                }
                 ImGui.Text(QuestWrapper.CurTerritoryTypeCanFly.ToString());
             }
             catch (Exception e)

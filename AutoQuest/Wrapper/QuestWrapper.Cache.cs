@@ -1,3 +1,4 @@
+using AutoQuest.Excel;
 using ECommons.DalamudServices;
 
 namespace AutoQuest
@@ -6,6 +7,7 @@ namespace AutoQuest
     {
         private static Dictionary<uint, QuestWrapper> _cache = new();
         private static Dictionary<uint, QuestWrapper?> _invalid = new();
+        private static HashSet<byte> types = new();
         public static QuestWrapper? GetQuestById(uint id)
         {
             if (_invalid.TryGetValue(id, out _))
@@ -18,6 +20,11 @@ namespace AutoQuest
             else
             {
                 var res = new QuestWrapper(id);
+                foreach(var i in res.Quest.QuestListenerParams)
+                {
+                    if ((EventType)(i.QuestUInt8A) is EventType.None or EventType.Unk11 or EventType.Unk18 or EventType.Unk19 && i.Listener != 0)
+                        LogHelper.Info(res.Quest.Name + " "+ res.QuestId.ToString() +" " + i.QuestUInt8A);
+                }
                 _cache.Add(id, res);
                 return res;
             }

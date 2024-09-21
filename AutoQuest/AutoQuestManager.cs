@@ -27,7 +27,10 @@ namespace AutoQuest
                     return;
                 }
                 if(quest.IsComplete)
-                { return; }
+                {
+                    LogHelper.Info("dd");
+                    return; 
+                }
                 if (quest.TryGetTask(out var t))
                 {
                     Step?.Cancel();

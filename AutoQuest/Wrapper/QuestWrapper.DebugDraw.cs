@@ -221,47 +221,24 @@ namespace AutoQuest
             try
             {
                 ImGui.Text($"Start {Svc.Data.GetExcelSheet<ENpcResident>().GetRow(Quest.IssuerStart.Row).Singular}#{Quest.IssuerStart.Row} {Quest.IssuerLocation.Value.Info()}");
-                using (var indent1 = new ImGuiIndent(20))
+                using var indent = new ImGuiIndent(20);
+                foreach (var (seq, lel) in Quest.QuestListenerParams.Where(l => l.ActorDespawnSeq != 0xff).Zip(Quest.TodoParams.SelectMany(t => t.ToDoLocation.Where(t => t.Value != null && t.Value.RowId != 0).ToList())).GroupBy(e => e.First.ActorSpawnSeq).Select(g => (g.Key, g.ToList())))
                 {
-                    foreach (var SeqMessages in Quest.QuestTodoMessages.Where(s => s.Value.Value.ToString() != ""))
+                    ImGui.Text($"{seq}");
+                    foreach (var lis in lel.Select(v => v.First.ActorDespawnSeq).ToHashSet())
                     {
-                        var seq = SeqMessages.Value.Variable.ToString().Split('_').Last().ToNumber();
-                        var loc = Quest.TodoParams.Where(t => t.ToDoCompleteSeq == (seq + 1) || (MaxSeq == (seq + 1) && t.ToDoCompleteSeq == 0xff)).First();
-                        var i = 0;
-                        var lis = Quest.QuestListenerParams.Where(l => (l.ActorSpawnSeq == (seq + 1) || (l.ActorSpawnSeq == 0XFF && MaxSeq == (seq + 1))) && l.ActorDespawnSeq != 0xff);
-                        ImGui.Text($"{loc.ToDoCompleteSeq} - 0xFF  {SeqMessages.Value.Value}");
-                        using var indent2 = new ImGuiIndent(20);
-                        foreach (var Msg in lis)
+                        ImGui.Text($"- {Quest.QuestTodoMessages[lis].Value.Value}");
+                    }
+                    using (var indent1 = new ImGuiIndent(20))
+                    {
+                        foreach (var (lis, lvl) in lel)
                         {
-                            //if (Msg.Listener != 5020000 || (lis.Count() == 1 && loc.ToDoLocation[i].Value != null))
+                            ImGui.Text($"{QuestListenerString.FromQuest(lis, this)}");
+                            ImGui.SameLine();
+                            ImGuiHelper.ClickText(lvl.Value.Info(), "点击跳转", () =>
                             {
-                                var content = 0u;
-                                if (Msg.Listener == 5010000)
-                                {
-                                    var index = Quest.QuestListenerParams.Where(l => l.Listener == 5010000).IndexOf(l => l.ActorSpawnSeq == Msg.ActorSpawnSeq && l.ActorDespawnSeq == Msg.ActorDespawnSeq);
-                                    var dungeons = Quest.QuestParams.Where(s => s.ScriptInstruction.ToString().Contains("INSTANCEDUNGEON")).ToList();
-                                    if (dungeons.Count > index)
-                                        content = dungeons[index].ScriptArg;
-                                }
-                                var territory = 0u;
-                                if (Msg.Listener == 5020000)
-                                {
-                                    var index = Quest.QuestListenerParams.Where(l => l.Listener == 5020000).IndexOf(l => l.ActorSpawnSeq == Msg.ActorSpawnSeq && l.ActorDespawnSeq == Msg.ActorDespawnSeq);
-                                    var territorys = Quest.QuestParams.Where(s => s.ScriptInstruction.ToString().Contains("TERRITORYTYPE")).ToList();
-                                    if (territorys.Count > index)
-                                        territory = territorys[index].ScriptArg;
-                                }
-                                ImGui.Text($"{new QuestListenerString(Msg,content,territory)}");
-                                if (loc.ToDoLocation[i].Value != null)
-                                {
-                                    ImGui.SameLine();
-                                    ImGuiHelper.ClickText(loc.ToDoLocation[i].Value.Info(), "点击跳转", () =>
-                                    {
-                                        OpenMapWithMapLink(loc.ToDoLocation[i].Value.ToMapLinkString());
-                                    });
-                                    i++;
-                                }
-                            }
+                                OpenMapWithMapLink(lvl.Value.ToMapLinkString());
+                            });
                         }
                     }
                 }
@@ -271,7 +248,7 @@ namespace AutoQuest
                 LogHelper.Error(ex.ToString());
                 return;
             }
-        }
+        }   
         private delegate bool OpenMapWithFlagDelegate(nint ptr, string str);
         private unsafe delegate nint GetUIMapObjectDelegate(UIModule* instance);
         public bool OpenMapWithMapLink(string mapLinkString)

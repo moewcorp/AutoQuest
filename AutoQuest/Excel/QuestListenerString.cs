@@ -1,3 +1,4 @@
+using ECommons;
 using ECommons.DalamudServices;
 using Lumina.Excel.GeneratedSheets2;
 using System.Numerics;
@@ -23,35 +24,36 @@ namespace AutoQuest.Excel
         }
         public override string ToString()
         {
+            return $"{(EventType)Type} Object:{GetTarget()}";
+        }
+        public static explicit operator string(QuestListenerString s) 
+        {
+            return s.ToString();
+        }
+        private string GetTarget()
+        {
             if (Listener == 5000000)
             {
                 var data = Svc.Data.GetExcelSheet<Level>()?.GetRow(ConditionValue);
-                return $"{(EventType)Type} {data} Pos:{data.Territory.Value.PlaceName.Value.Name}{new Vector3(data.X, data.Y, data.Z)} Object:{data.Object.Row}";
+                return $"{data} Pos:{data.Territory.Value.PlaceName.Value.Name}{new Vector3(data.X, data.Y, data.Z)} Object:{data.Object.Row}";
             }
-            else if(Listener == 5010000)
+            else if (Listener == 5010000)
             {
-                if(Content != 0)
+                if (Content != 0)
                 {
-                    var str = string.Empty;
-                    foreach (var s in Svc.Data.GetExcelSheet<ContentFinderCondition>()?.Where(c => c.Content.Row == Content))
-                    {
-                        str += $"{s} {s.Name}";
-                    }
-                    return $"{(EventType)Type} {str}";
+                    var cfc = Svc.Data.GetExcelSheet<ContentFinderCondition>()?.Where(c => c.Content.Row == Content).First();
+                    if (cfc != null)
+                        return $"{cfc} {cfc.Name}";
                 }
-                else if(Type == 8)
-                {
-                    return $"{(EventType)Type} 在指定区域使用指定物品";
-                }
-                return Content.ToString();
+                return "null";
             }//5020000 可能是去某个地图
             else if (Listener == 5020000)
             {
                 if (TerritoryType != 0)
                 {
                     var terr = Svc.Data.GetExcelSheet<TerritoryType>().GetRow(TerritoryType);
-                    return $"{(EventType)Type} {terr} {terr.PlaceName.Value.Name}";
-                } 
+                    return $"{terr} {terr.PlaceName.Value.Name}";
+                }
                 return "TerritoryType";
             }
             else if (Listener > 3000000)
@@ -62,42 +64,61 @@ namespace AutoQuest.Excel
             {
                 var eobj = Svc.Data.GetExcelSheet<EObj>()?.GetRow(Listener);
                 var eobjname = Svc.Data.GetExcelSheet<EObjName>()?.GetRow(Listener);
-                return $"{(EventType)Type} {eobj} {eobjname.Singular}";
+                return $"{eobj} {eobjname.Singular}";
             }
             else if (Listener > 1000000)
             {
                 var enpc = Svc.Data.GetExcelSheet<ENpcBase>()?.GetRow(Listener);
                 var enpcname = Svc.Data.GetExcelSheet<ENpcResident>()?.GetRow(Listener);
-                return $"{(EventType)Type} {enpc} {enpcname.Singular}";
+                return $"{enpc} {enpcname.Singular}";
             }
             else
             {
                 var bnpc = Svc.Data.GetExcelSheet<BNpcBase>()?.GetRow(Listener);
                 if (ConditionValue == 0)
                 {
-                    return $"{(EventType)Type} {bnpc} BaseId:{Listener}";
+                    return $"{bnpc} BaseId:{Listener}";
                 }
                 else
                 {
                     var lel = Svc.Data.GetExcelSheet<Level>()?.GetRow(ConditionValue);
-                    return $"{(EventType)Type} EventBNpc#{Listener} Pos:{lel.Territory.Value.PlaceName.Value.Name}{new Vector3(lel.X, lel.Y, lel.Z)} Object:{lel.Object.Row}";
+                    return $"EventBNpc#{Listener} Pos:{lel.Territory.Value.PlaceName.Value.Name}{new Vector3(lel.X, lel.Y, lel.Z)} Object:{lel.Object.Row}";
                 }
             }
-            return "null";
         }
-        public static explicit operator string(QuestListenerString s) 
+        public static QuestListenerString FromQuest(QuestListenerParamsStruct listener, QuestWrapper quest)
         {
-            return s.ToString();
+            var content = 0u;
+            if (listener.Listener == 5010000)
+            {
+                var index = quest.Quest.QuestListenerParams.Where(l => l.Listener == 5010000).IndexOf(l => l.ActorSpawnSeq == listener.ActorSpawnSeq && l.ActorDespawnSeq == listener.ActorDespawnSeq);
+                var dungeons = quest.Quest.QuestParams.Where(s => s.ScriptInstruction.ToString().Contains("INSTANCEDUNGEON")).ToList();
+                if (dungeons.Count > index)
+                    content = dungeons[index].ScriptArg;
+            }
+            var territory = 0u;
+            if (listener.Listener == 5020000)
+            {
+                var index = quest.Quest.QuestListenerParams.Where(l => l.Listener == 5020000).IndexOf(l => l.ActorSpawnSeq == listener.ActorSpawnSeq && l.ActorDespawnSeq == listener.ActorDespawnSeq);
+                var territorys = quest.Quest.QuestParams.Where(s => s.ScriptInstruction.ToString().Contains("TERRITORYTYPE")).ToList();
+                if (territorys.Count > index)
+                    territory = territorys[index].ScriptArg;
+            }
+            return new QuestListenerString(listener, content, territory);
         }
     }
     public enum EventType : byte
     {
+        None = 0,
         Normal = 1,
         RangeEnemy = 5,
         UseEventItem = 8,
         Enemy = 9,
         Range = 10,
+        Unk11 = 11,
         EnterTerritory = 15,
+        Unk18 = 18,
+        Unk19 = 19,
         Say = 23
     }
 }

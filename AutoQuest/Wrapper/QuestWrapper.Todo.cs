@@ -60,7 +60,7 @@ namespace AutoQuest
                 {
                     if ((obj.Position - Svc.ClientState.LocalPlayer.Position).Length() > 3)
                     {
-                        todo = Step.CreateMoveTarget(obj, (new Vector3(todod.level.X, todod.level.Y, todod.level.Z) - Svc.ClientState.LocalPlayer.Position).Length() > 25 && todod.level.Territory.Value.Mount);
+                        todo = Step.CreateMoveTarget(obj, (obj.Position - Svc.ClientState.LocalPlayer.Position).Length() > 25 && todod.level.Territory.Value.Mount);
                         return true;
                     }
                     else
@@ -274,8 +274,9 @@ namespace AutoQuest
             }
             set
             {
-                if(Svc.Data.GetExcelSheet<TerritoryType>().GetRow(Svc.ClientState.TerritoryType).Mount)
+                if (Svc.Data.GetExcelSheet<TerritoryType>().GetRow(Svc.ClientState.TerritoryType).Mount)
                 {
+                    LogHelper.Info($"Set CanFlyFlag({(long)CurTerritoryTypeCanFlyFlag:X}):{value}");
                     *CurTerritoryTypeCanFlyFlag = value;
                 }
             }

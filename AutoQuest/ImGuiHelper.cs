@@ -12,7 +12,11 @@ namespace AutoQuest
             {
                 ImGui.Text(text);
                 if (ImGui.IsItemHovered())
+                {
+                    ImGui.PushStyleColor(ImGuiCol.Text, Dalamud.Interface.Colors.ImGuiColors.HealerGreen);
                     ImGui.SetTooltip(tooltip);
+                    ImGui.PopStyleColor();
+                }
                 if (ImGui.IsItemClicked())
                     clickAction.Invoke();
             }
