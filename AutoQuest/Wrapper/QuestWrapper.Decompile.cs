@@ -87,6 +87,24 @@ namespace AutoQuest
             }
             return false;
         }
+        public bool IsBattleStart(ushort scene)
+        {
+            foreach (var (_, func) in DecompileCode.Value)
+            {
+                if (func.IsScene && scene == func.SceneIndex)
+                    return func.IsBattleStart;
+            }
+            return false;
+        }
+        public bool IsBattleCheck(ushort scene)
+        {
+            foreach (var (_, func) in DecompileCode.Value)
+            {
+                if (func.IsScene && scene == func.SceneIndex)
+                    return func.IsBattleCheck;
+            }
+            return false;
+        }
         private QuestWrapper()
         {
             DecompileCode = new(Decompile);

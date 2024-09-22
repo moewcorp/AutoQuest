@@ -4,6 +4,7 @@ using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using ImGuiNET;
 using Lumina.Excel.GeneratedSheets2;
 using System.Diagnostics;
+using System.Numerics;
 
 namespace AutoQuest
 {
@@ -60,6 +61,17 @@ namespace AutoQuest
                     QuestWrapper.CurTerritoryTypeCanFly = true;
                 }
                 ImGui.Text(QuestWrapper.CurTerritoryTypeCanFly.ToString());
+                if (ImGui.Button("ddw"))
+                {
+                    for(var i = 0;i< 1000000; i++)
+                    {
+                        var d = Helper.GetData((uint)i);
+                        if (d!= 0)
+                        {
+                            LogHelper.Info($"{i} {d:X} {*(Vector3*)(d + 0x40)} {*(ushort*)(d + 0x86)}");
+                        }
+                    }
+                }
             }
             catch (Exception e)
             {
@@ -73,7 +85,8 @@ namespace AutoQuest
         {
             69016,
             70213,
-            69005
+            69005,
+            70286
         };
         public static void DrawDebug()
         {
@@ -89,13 +102,13 @@ namespace AutoQuest
                 {
                     list = QuestManager.Instance()->NormalQuestsSpan.ToArray().Select(x => (x.QuestId, x.Sequence)).ToList();
                 }
-                //foreach(var test in TestQuest)
-                //{
-                //    if (!list.Any(x => x.QuestId == (test & 0xffff)))
-                //    {
-                //        list.Add(((ushort)(test & 0xffff), 0));
-                //    }
-                //}
+                foreach (var test in TestQuest)
+                {
+                    if (!list.Any(x => x.QuestId == (test & 0xffff)))
+                    {
+                        list.Add(((ushort)(test & 0xffff), 0));
+                    }
+                }
                 foreach (var quest in list)
                 {
                     if (quest.QuestId == 0)

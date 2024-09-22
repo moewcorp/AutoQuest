@@ -111,5 +111,10 @@ namespace AutoQuest
             }
             return list;
         }
+        private static nint fpGetData => Svc.SigScanner.ScanText("E8 ?? ?? ?? ?? 48 ?? ?? 74 ?? 44 ?? ?? ?? 4D");
+        public static long GetData(uint id)
+        {
+            return ((delegate* unmanaged[Stdcall]<byte, uint, uint, long>)fpGetData)(0x29, id, 0);
+        }
     }
 }

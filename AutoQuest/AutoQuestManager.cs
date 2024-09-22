@@ -28,7 +28,6 @@ namespace AutoQuest
                 }
                 if(quest.IsComplete)
                 {
-                    LogHelper.Info("dd");
                     return; 
                 }
                 if (quest.TryGetTask(out var t))

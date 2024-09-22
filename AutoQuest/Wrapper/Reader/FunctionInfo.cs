@@ -14,6 +14,8 @@ namespace AutoQuest.Wrapper.Reader
         public bool IsQuestReward { get; set; }
         public uint SceneIndex { get; set; }
         public bool IsInventory { get; set; }
+        public bool IsBattleStart { get; set; }
+        public bool IsBattleCheck { get; set; }
         public FunctionInfo(StringReaderWithLine reader, string questName)
         {
             string? str;
@@ -25,10 +27,26 @@ namespace AutoQuest.Wrapper.Reader
                 CheckQuestReward(str);
                 CheckNpcTrade(str);
                 CheckInventory(str);
+                CheckBattle(str);
                 if (CheckFunctionEnd(str, line))
                     break;
             }
         }
+
+        private void CheckBattle(string str)
+        {
+            var reg = Regex.Match(str, @"_ARG_0_:GetQuestBattleProgress\(\) == 0");
+            if (reg.Success)
+            {
+                IsBattleStart = true;
+            }
+            reg = Regex.Match(str, @"_ARG_0_:GetQuestBattleProgress\(\) == 1");
+            if (reg.Success)
+            {
+                IsBattleCheck = true;
+            }
+        }
+
         private void CheckFunctionStart(string str, string questName, int line)
         {
             if (Name == null)

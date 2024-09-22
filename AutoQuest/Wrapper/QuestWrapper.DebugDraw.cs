@@ -2,6 +2,7 @@ using AutoQuest.Excel;
 using AutoQuest.Extension;
 using ECommons;
 using ECommons.DalamudServices;
+using ECommons.Reflection;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using ImGuiNET;
 using Lumina.Excel.GeneratedSheets2;
@@ -94,7 +95,7 @@ namespace AutoQuest
                             {
                                 if (todolel.Value?.Territory.Value is null)
                                     continue;
-                                ImGui.Text($"{todo.ToDoCompleteSeq} {todo.ToDoQty} {todolel.Value?.Territory.Value?.PlaceName.Value?.Name} {todolel.Value?.X} {todolel.Value?.Y} {todolel.Value?.Z} {todolel.Value.Radius} {todolel.Value?.Type} {todolel.Value?.Object.Row}");
+                                ImGui.Text($"{todolel.Value} {todo.ToDoCompleteSeq} {todo.ToDoQty} {todolel.Value?.Territory.Value?.PlaceName.Value?.Name} {todolel.Value?.X} {todolel.Value?.Y} {todolel.Value?.Z} {todolel.Value.Radius} {todolel.Value?.Type} {todolel.Value?.Object.Row}");
                                 if (QuestEventHandler != null)
                                 {
                                     var s = QuestEventHandler->GetTodoArgs((byte)(todo.ToDoCompleteSeq == 0xff ? (byte)(GetMaxSeq() - 1) : (todo.ToDoCompleteSeq - 1)));
@@ -144,22 +145,22 @@ namespace AutoQuest
                                 continue;
                             if (Listener.Listener == 0)
                                 continue;
-                            if (ShowIsAnnounce && !QuestEventHandler->IsAnnounce(Listener))
-                                continue;
+                            //if (ShowIsAnnounce && !QuestEventHandler->IsAnnounce(Listener))
+                            //    continue;
                             {
                                 var str = i.ToString().PadLeft(2, '0');
                                 foreach (var s in Listener.GetPropertyNameAndValueString().Select(s => s + " "))
                                     str += s;
                                 ImGui.Text(str);
-                                ImGui.Text(QuestEventHandler->IsAcceptEvent(Listener).ToString() + " " + QuestEventHandler->IsAnnounce(Listener).ToString() + QuestEventHandler->IsQualified(Listener));
-                                if (Listener.Listener == 5000000)
-                                {
-                                    var range = Svc.Data.GetExcelSheet<Level>().GetRow(Listener.ConditionValue);
-                                    if (range != null)
-                                    {
-                                        ImGui.Text(QuestEventHandler->IsInEventRange(Listener.ConditionValue).ToString() + " " + range.Territory.Value.PlaceName.Value.Name +(new Vector3(range.X,range.Y,range.Z)).ToString());
-                                    }
-                                }
+                                //ImGui.Text(QuestEventHandler->IsAcceptEvent(Listener).ToString() + " " + QuestEventHandler->IsAnnounce(Listener).ToString() + QuestEventHandler->IsQualified(Listener));
+                                //if (Listener.Listener == 5000000)
+                                //{
+                                //    var range = Svc.Data.GetExcelSheet<Level>().GetRow(Listener.ConditionValue);
+                                //    if (range != null)
+                                //    {
+                                //        ImGui.Text(QuestEventHandler->IsInEventRange(Listener.ConditionValue).ToString() + " " + range.Territory.Value.PlaceName.Value.Name +(new Vector3(range.X,range.Y,range.Z)).ToString());
+                                //    }
+                                //}
                             }
                         }
                         ImGui.TreePop();
@@ -170,7 +171,16 @@ namespace AutoQuest
                         {
                             if (s.ScriptArg == 0)
                                 continue;
-                            ImGui.Text(s.ScriptInstruction + ":" + s.ScriptArg.ToString());
+                            string a = "";
+                            if (s.ScriptInstruction.ToString().Contains("BIND_ACTOR"))
+                            {
+                                a = Svc.Data.GetExcelSheet<ENpcResident>().GetRow(Svc.Data.GetExcelSheet<Level>().GetRow(s.ScriptArg).Object.Row).Singular;
+                            }
+                            else if (s.ScriptInstruction.ToString().Contains("ACTOR"))
+                            {
+                                a = Svc.Data.GetExcelSheet<ENpcResident>().GetRow(s.ScriptArg).Singular;
+                            }
+                            ImGui.Text(s.ScriptInstruction + ":" + s.ScriptArg.ToString() +" "+a);
                         }
                         ImGui.TreePop();
                     }

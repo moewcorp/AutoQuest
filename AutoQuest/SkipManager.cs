@@ -1,24 +1,51 @@
 using AutoQuest.Extension;
 using Dalamud.Hooking;
 using ECommons.DalamudServices;
+using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using System.Runtime.InteropServices;
 
 namespace AutoQuest
 {
-    internal class SkipManager : IDisposable
+    internal unsafe class SkipManager : IDisposable
     {
         public static SkipManager Instance { get; private set; } = new SkipManager();
         private delegate void EventActionDelegate(long a1, ulong a2, uint eventId, ushort sence, long a4, long a5, byte a6);
         private Hook<EventActionDelegate> OnEventAction;
         private delegate void EventFinishDelegate(long a1, uint a2, byte a3, uint a4, uint a5);
         private Hook<EventFinishDelegate> OnEventFinish;
+        private unsafe delegate void OpenMapDelegate(long a1, OpenMapInfo* a2);
+        private Hook<OpenMapDelegate> OnOpenMap;
         public SkipManager()
         {
             OnEventAction = Svc.Hook.HookFromAddress(Svc.SigScanner.ScanText("48 89 5C 24 ?? 57 48 ?? ?? ?? 8B ?? ?? ?? ?? ?? 41 ?? ?? ?? 48"), new EventActionDelegate(EventActionDetour));
             OnEventAction.Enable();
             OnEventFinish = Svc.Hook.HookFromAddress(Svc.SigScanner.ScanText("40 ?? 55 41 ?? 41 ?? 41 ?? 48 ?? ?? ?? 33 ?? 45"), new EventFinishDelegate(OnEventFinishDetour));
             OnEventFinish.Enable();
+            OnOpenMap = Svc.Hook.HookFromAddress(Svc.SigScanner.ScanText("E8 ?? ?? ?? ?? 49 8B 45 28 48 8D 8C 24"), new OpenMapDelegate(OnOpenMapDetour));
+            OnOpenMap.Enable();
             Svc.GameNetwork.NetworkMessage += GameNetwork_NetworkMessage;
+        }
+
+        private unsafe void OnOpenMapDetour(long a1, OpenMapInfo* a2)
+        {
+
+            OnOpenMap.Original(a1,a2);
+        }
+        [StructLayout(LayoutKind.Explicit, Size = 0x8E)]
+        public struct OpenMapInfo
+        {
+            [FieldOffset(0x00)] public MapType Type;
+            [FieldOffset(0x04)] public uint AddonId;
+            [FieldOffset(0x08)] public uint TerritoryId;
+            [FieldOffset(0x0C)] public uint MapId;
+            [FieldOffset(0x10)] public uint PlaceNameId;
+            [FieldOffset(0x14)] public uint AetheryteId;
+            [FieldOffset(0x18)] public uint FateId;
+            [FieldOffset(0x1C)] public uint Unk1C;
+            [FieldOffset(0x20)] public FFXIVClientStructs.FFXIV.Client.System.String.Utf8String TitleString;
+            [FieldOffset(0x88)] public uint Unk88;
+            [FieldOffset(0x8C)] public byte Unk8C;
+            [FieldOffset(0x8D)] public bool Unk8D; // something for QuestRedoMapMarker
         }
 
         private void GameNetwork_NetworkMessage(nint dataPtr, ushort opCode, uint sourceActorId, uint targetActorId, Dalamud.Game.Network.NetworkMessageDirection direction)
@@ -60,8 +87,11 @@ namespace AutoQuest
                         {
                             if (!quest.IsNpcTradeScene(sence))
                             {
-                                VoidEvent.SendPackt(new EventStartQuest(eventId, sence));
-                                return;
+                                if (!quest.IsBattleCheck(sence))
+                                {
+                                    VoidEvent.SendPackt(new EventStartQuest(eventId, sence));
+                                    return;
+                                }
                             }
                             else
                             {
@@ -84,6 +114,7 @@ namespace AutoQuest
         {
             OnEventAction?.Dispose();
             OnEventFinish?.Dispose();
+            OnOpenMap?.Dispose();
             Svc.GameNetwork.NetworkMessage -= GameNetwork_NetworkMessage;
         }
     }
