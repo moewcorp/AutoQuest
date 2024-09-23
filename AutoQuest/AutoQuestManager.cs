@@ -26,10 +26,10 @@ namespace AutoQuest
                 {
                     return;
                 }
-                if(quest.IsComplete)
-                {
-                    return; 
-                }
+                //if(quest.IsComplete)
+                //{
+                //    return; 
+                //}
                 if (quest.TryGetTask(out var t))
                 {
                     Step?.Cancel();

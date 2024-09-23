@@ -20,7 +20,7 @@ namespace AutoQuest.Extension
         {
             if (level == null)
                 return "111";
-            return $"{level?.Territory.Value?.PlaceName.Value?.Name ?? " "} {level?.Pos() ?? Vector3.Zero}";
+            return $"{level}{level?.Territory.Value?.PlaceName.Value?.Name ?? " "} {level?.Pos() ?? Vector3.Zero}";
         }
         public static string ToMapLinkString(this Level level) => $"m:{level.Territory.Row},{level.Territory.Value?.Map.Value?.RowId},{(int)(level.X * 1000f)},{(int)(level.Z * 1000f)}";
     }

@@ -82,7 +82,9 @@ namespace AutoQuest.Excel
                 else
                 {
                     var lel = Svc.Data.GetExcelSheet<Level>()?.GetRow(ConditionValue);
-                    return $"EventBNpc#{Listener} Pos:{lel.Territory.Value.PlaceName.Value.Name}{new Vector3(lel.X, lel.Y, lel.Z)} Object:{lel.Object.Row}";
+                    if (lel == null)
+                        return ConditionValue.ToString();
+                    return $"EventBNpc#{Listener} Pos:{lel?.Territory.Value?.PlaceName.Value?.Name ?? "unkname"}{new Vector3(lel.X, lel.Y, lel.Z)} Object:{lel.Object.Row}";
                 }
             }
         }

@@ -96,16 +96,16 @@ namespace AutoQuest
                                 if (todolel.Value?.Territory.Value is null)
                                     continue;
                                 ImGui.Text($"{todolel.Value} {todo.ToDoCompleteSeq} {todo.ToDoQty} {todolel.Value?.Territory.Value?.PlaceName.Value?.Name} {todolel.Value?.X} {todolel.Value?.Y} {todolel.Value?.Z} {todolel.Value.Radius} {todolel.Value?.Type} {todolel.Value?.Object.Row}");
-                                if (QuestEventHandler != null)
-                                {
-                                    var s = QuestEventHandler->GetTodoArgs((byte)(todo.ToDoCompleteSeq == 0xff ? (byte)(GetMaxSeq() - 1) : (todo.ToDoCompleteSeq - 1)));
-                                    ImGui.SameLine();
-                                    ImGui.Text(s.Current.ToString() + " " + s.Max.ToString());
-                                }
+                                //if (QuestEventHandler != null)
+                                //{
+                                //    var s = QuestEventHandler->GetTodoArgs((byte)(todo.ToDoCompleteSeq == 0xff ? (byte)(GetMaxSeq() - 1) : (todo.ToDoCompleteSeq - 1)));
+                                //    ImGui.SameLine();
+                                //    ImGui.Text(s.Current.ToString() + " " + s.Max.ToString());
+                                //}
                             }
                         }
-                        if (ImGui.Button($"IsAcceptEvent###isa{Quest.Name}"))
-                            LogHelper.Info(QuestEventHandler->IsAcceptEvent(Svc.Targets.Target).ToString());
+                        //if (ImGui.Button($"IsAcceptEvent###isa{Quest.Name}"))
+                        //    LogHelper.Info(QuestEventHandler->IsAcceptEvent(Svc.Targets.Target).ToString());
                         ImGui.TreePop();
                     }
                     if (ImGui.TreeNode($"QuestListener###l{Quest.Name}"))
@@ -172,13 +172,20 @@ namespace AutoQuest
                             if (s.ScriptArg == 0)
                                 continue;
                             string a = "";
-                            if (s.ScriptInstruction.ToString().Contains("BIND_ACTOR"))
+                            try
                             {
-                                a = Svc.Data.GetExcelSheet<ENpcResident>().GetRow(Svc.Data.GetExcelSheet<Level>().GetRow(s.ScriptArg).Object.Row).Singular;
+                                if (s.ScriptInstruction.ToString().Contains("BIND_ACTOR"))
+                                {
+                                    a = Svc.Data.GetExcelSheet<ENpcResident>().GetRow(Svc.Data.GetExcelSheet<Level>().GetRow(s.ScriptArg).Object.Row).Singular;
+                                }
+                                else if (s.ScriptInstruction.ToString().Contains("ACTOR"))
+                                {
+                                    a = Svc.Data.GetExcelSheet<ENpcResident>().GetRow(s.ScriptArg).Singular;
+                                }
                             }
-                            else if (s.ScriptInstruction.ToString().Contains("ACTOR"))
+                            catch
                             {
-                                a = Svc.Data.GetExcelSheet<ENpcResident>().GetRow(s.ScriptArg).Singular;
+                                a = "error";
                             }
                             ImGui.Text(s.ScriptInstruction + ":" + s.ScriptArg.ToString() +" "+a);
                         }
@@ -212,16 +219,16 @@ namespace AutoQuest
                         if (ImGui.Button("EnterRange"))
                             VoidEvent.SendPackt(new EventEnterRange(d.ConditionValue, QuestId));
                     }
-                    if (QuestEventHandler != null)
-                    {
-                        if (QuestEventHandler->TryGetEventItems(out var results))
-                        {
-                            for (int i = 0; i < results.Count; i++)
-                            {
-                                ImGui.Text(results[i].ItemId + " " + results[i].Count.ToString() + " " + results[i].Unk.ToString());
-                            }
-                        }
-                    }
+                    //if (QuestEventHandler != null)
+                    //{
+                    //    if (QuestEventHandler->TryGetEventItems(out var results))
+                    //    {
+                    //        for (int i = 0; i < results.Count; i++)
+                    //        {
+                    //            ImGui.Text(results[i].ItemId + " " + results[i].Count.ToString() + " " + results[i].Unk.ToString());
+                    //        }
+                    //    }
+                    //}
                 }
                 catch (Exception ex)
                 {

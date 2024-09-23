@@ -102,7 +102,31 @@ namespace AutoQuest
         public string QuestMessagePath => Quest.MessagesPath;
         public string LuaFilePath => Quest.LuaFile.Path;
         public bool IsComplete => QuestManager.IsQuestComplete(QuestId);
-        public IEnumerable<(byte Seq,List<(QuestListenerParamsStruct Listener,LazyRow<Level> Level)> Info)> MainInfo => Quest.QuestListenerParams.Where(l => l.ActorDespawnSeq != 0xff).GroupBy(x=>x.Listener).Select(x=>x.First()).Zip(Quest.TodoParams.SelectMany(t => t.ToDoLocation.Where(t => t.Value != null && t.Value.RowId != 0).ToList())).GroupBy(e => e.First.ActorSpawnSeq).Select(g => (g.Key, g.ToList()));
+        public IEnumerable<(byte Seq, List<(QuestListenerParamsStruct Listener, LazyRow<Level> Level)> Info)> MainInfo => Quest.QuestListenerParams.Where(l => l.ActorDespawnSeq != 0xff && !(IsPopRangeTarget(l.Listener) && GetFirstSeq(l.Listener) != l.ActorSpawnSeq)).Zip(Quest.TodoParams.SelectMany(t => t.ToDoLocation.Where(t => t.Value != null && t.Value.RowId != 0).ToList())).GroupBy(e => e.First.ActorSpawnSeq).Select(g => (g.Key, g.ToList()));
+        public bool IsPopRangeTarget(uint BaseId)
+        {
+            for(var i = 0; i < 50; i++)
+            {
+                if (Quest.QuestParams[i].ScriptInstruction.ToString() =="")
+                    break;
+                if (Quest.QuestParams[i].ScriptArg == BaseId)
+                {
+                    var j = i;
+                    while(++j < 50)
+                    {
+                        var str = Quest.QuestParams[j].ScriptInstruction.ToString();
+                        if (str.Contains("POPRANGE"))
+                            return true;
+                        if (str.Contains("ACTOR") || str.Contains("EOBJECT"))
+                        {
+                            break;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+        public byte GetFirstSeq(uint listener) => Quest.QuestListenerParams.First(l => l.ActorDespawnSeq != 0xff && l.Listener == listener).ActorSpawnSeq;
         public byte GetMaxSeq()
         {
             var todo = Quest.TodoParams;
