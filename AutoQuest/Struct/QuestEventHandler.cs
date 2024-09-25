@@ -272,7 +272,7 @@ namespace AutoQuest.Struct
                 ((delegate* unmanaged[Stdcall]<lua_State*, int, void>)fpLua_CheckStack)(ptr, 10);
             }
         }
-        private static nint fpLua_PushInteger => Svc.SigScanner.ScanText("E8 ?? ?? ?? ?? 48 ?? ?? ?? 33 ?? 38 54 24");
+        private static nint fpLua_PushInteger => Svc.SigScanner.ScanText("E8 ?? ?? ?? ?? 48 ?? ?? ?? ?? 33 ?? E8 ?? ?? ?? ?? BB");
         public void lua_pushinteger(int value)
         {
             fixed (lua_State* ptr = &this)

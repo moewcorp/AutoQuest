@@ -44,18 +44,11 @@ namespace AutoQuest.Move
                     }
                     else
                     {
-                        var count = Waypoints.Result.Count;
-                        if (count != WaypointsCount)
+                        if(Waypoints.Result.Count == 0)
                         {
-                            WaypointsCount = count;
-                            Time = TimeHelper.Now();
-                        }
-                        else
-                        {
-                            if (TimeHelper.Now() - Time > 10000)
-                            {
-                                //todo;
-                            }
+                            Wait?.SetResult(true);
+                            Waypoints = null;
+                            WaypointsCount = 0;
                         }
                     }
                 }

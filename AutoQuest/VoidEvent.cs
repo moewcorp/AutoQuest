@@ -71,7 +71,7 @@ namespace AutoQuest
             return ((delegate* unmanaged[Stdcall]<nint, nint>)fpGetNetModle)((nint)(FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance()));
         }
         public static int eventStart => Marshal.ReadInt32(Svc.SigScanner.ScanText("C7 44 24 ?? ?? ?? ?? ?? 48 C7 44 24 ?? ?? ?? ?? ?? 89 5C 24 ?? 0F 85") + 0x4);
-        public static int eventFinish => Marshal.ReadInt32(Svc.SigScanner.ScanText("E8 ?? ?? ?? ?? EB 10 48 8B 0D ?? ?? ?? ??") + 0xCE);
+        public static int eventFinish => Marshal.ReadInt32(Svc.SigScanner.ScanText("E8 ?? ?? ?? ?? EB 10 48 8B 0D ?? ?? ?? ??") + 0xCE);//d9
     }
     [StructLayout(LayoutKind.Explicit, Size = 0x30)]
     public struct EventStartPackt

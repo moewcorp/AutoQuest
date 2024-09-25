@@ -41,7 +41,25 @@ namespace AutoQuest.Excel
             {
                 if (Content != 0)
                 {
-                    var cfc = Svc.Data.GetExcelSheet<ContentFinderCondition>()?.Where(c => c.Content.Row == Content).First();
+                    ContentFinderCondition? cfc = null;
+                    if (TerritoryType == 0)
+                    {
+                        //PublicContent
+                        var pc = Svc.Data.GetExcelSheet<PublicContent>().GetRow(Content);
+                        cfc = pc.ContentFinderCondition.Value;
+                        if (pc.Type == 7)
+                        {
+                            var bozya = Svc.Data.GetExcelSheet<DynamicEvent>().GetRow(pc.AdditionalData.Row * 16);
+                            if(bozya != null)
+                            {
+                                return $"{bozya} {bozya.Name}";
+                            }
+                        }
+                    }
+                    else
+                    {
+                        cfc = Svc.Data.GetExcelSheet<ContentFinderCondition>()?.Where(c => c.Content.Row == Content).First();
+                    }
                     if (cfc != null)
                         return $"{cfc} {cfc.Name}";
                 }
