@@ -13,14 +13,16 @@ namespace AutoQuest.Excel
         public uint Content;
         public byte Type;
         public uint TerritoryType;
-        public QuestListenerString(QuestListenerParamsStruct listener, uint content = 0, uint territory = 0) : this(listener.Listener, listener.ConditionValue, listener.QuestUInt8A, content, territory) { }
-        public QuestListenerString(uint listener,uint conditionValue, byte type,uint content = 0, uint territory = 0)
+        public byte ConditionType;
+        public QuestListenerString(QuestListenerParamsStruct listener, uint content = 0, uint territory = 0) : this(listener.Listener, listener.ConditionValue, listener.QuestUInt8A, listener.ConditionType, content, territory) { }
+        public QuestListenerString(uint listener,uint conditionValue, byte type, byte conditionType, uint content = 0, uint territory = 0)
         {
             Listener = listener;
             ConditionValue = conditionValue;
             Type = type;
             Content = content;
             TerritoryType = territory;
+            ConditionType = conditionType;
         }
         public override string ToString()
         {
@@ -34,31 +36,27 @@ namespace AutoQuest.Excel
         {
             if (Listener == 5000000)
             {
-                var data = Svc.Data.GetExcelSheet<Level>()?.GetRow(ConditionValue);
-                return $"{data} Pos:{data.Territory.Value.PlaceName.Value.Name}{new Vector3(data.X, data.Y, data.Z)} Object:{data.Object.Row}";
+                if (ConditionType == 3)
+                {
+                    var data = Svc.Data.GetExcelSheet<Level>()?.GetRow(ConditionValue);
+                    return $"{data} Pos:{data.Territory.Value.PlaceName.Value.Name}{new Vector3(data.X, data.Y, data.Z)} Object:{data.Object.Row}";
+                }
+                return "Range";
             }
             else if (Listener == 5010000)
             {
                 if (Content != 0)
                 {
                     ContentFinderCondition? cfc = null;
-                    if (TerritoryType == 0)
+                    cfc = Svc.Data.GetExcelSheet<ContentFinderCondition>()?.Where(c => c.Content.Row == Content).First(x=>x.TerritoryType.Row == TerritoryType);
+                    if(cfc.RowId  is 735 or 778)
                     {
-                        //PublicContent
                         var pc = Svc.Data.GetExcelSheet<PublicContent>().GetRow(Content);
-                        cfc = pc.ContentFinderCondition.Value;
-                        if (pc.Type == 7)
+                        var bozya = Svc.Data.GetExcelSheet<DynamicEvent>().GetRow(pc.AdditionalData.Row * 16);
+                        if (bozya != null)
                         {
-                            var bozya = Svc.Data.GetExcelSheet<DynamicEvent>().GetRow(pc.AdditionalData.Row * 16);
-                            if(bozya != null)
-                            {
-                                return $"{bozya} {bozya.Name}";
-                            }
+                            return $"{bozya} {bozya.Name}";
                         }
-                    }
-                    else
-                    {
-                        cfc = Svc.Data.GetExcelSheet<ContentFinderCondition>()?.Where(c => c.Content.Row == Content).First();
                     }
                     if (cfc != null)
                         return $"{cfc} {cfc.Name}";
@@ -93,30 +91,51 @@ namespace AutoQuest.Excel
             else
             {
                 var bnpc = Svc.Data.GetExcelSheet<BNpcBase>()?.GetRow(Listener);
-                if (ConditionValue == 0)
+                if (ConditionType == 0)
                 {
                     return $"{bnpc} BaseId:{Listener}";
                 }
                 else
                 {
-                    var lel = Svc.Data.GetExcelSheet<Level>()?.GetRow(ConditionValue);
-                    if (lel == null)
-                        return ConditionValue.ToString();
-                    return $"EventBNpc#{Listener} Pos:{lel?.Territory.Value?.PlaceName.Value?.Name ?? "unkname"}{new Vector3(lel.X, lel.Y, lel.Z)} Object:{lel.Object.Row}";
+                    if(ConditionType == 1)
+                    {
+                        var bnpcName = Svc.Data.GetExcelSheet<BNpcName>()?.GetRow(ConditionValue);
+                        return $"{bnpc} BaseId:{Listener} {bnpcName.Singular}";
+                    }
+                    if (ConditionType == 3)
+                    {
+                        var lel = Svc.Data.GetExcelSheet<Level>()?.GetRow(ConditionValue);
+                        if (lel == null)
+                            return ConditionValue.ToString();
+                        return $"EventBNpc#{Listener} Pos:{lel?.Territory.Value?.PlaceName.Value?.Name ?? "unkname"}{new Vector3(lel.X, lel.Y, lel.Z)} Object:{lel.Object.Row}";
+                    }
+                    return $"Unk:{Listener}";
                 }
             }
         }
         public static QuestListenerString FromQuest(QuestListenerParamsStruct listener, QuestWrapper quest)
         {
             var content = 0u;
+            var territory = 0u;
             if (listener.Listener == 5010000)
             {
                 var index = quest.Quest.QuestListenerParams.Where(l => l.Listener == 5010000).IndexOf(l => l.ActorSpawnSeq == listener.ActorSpawnSeq && l.ActorDespawnSeq == listener.ActorDespawnSeq);
                 var dungeons = quest.Quest.QuestParams.Where(s => s.ScriptInstruction.ToString().Contains("INSTANCEDUNGEON")).ToList();
                 if (dungeons.Count > index)
+                {
                     content = dungeons[index].ScriptArg;
+                }
+
+                var allContent = Svc.Data.GetExcelSheet<ContentFinderCondition>().Where(x => x.Content.Row == content);
+                foreach(var t in quest.Quest.TodoParams.SelectMany(x => x.ToDoLocation.Where(x => x.Value != null && x.Value.Territory.Row != 0)).Select(x => x.Value.Territory.Row).ToHashSet())
+                {
+                    if(allContent.Any(x => x.TerritoryType.Row == t))
+                    {
+                        territory = t;
+                        break;
+                    }
+                }
             }
-            var territory = 0u;
             if (listener.Listener == 5020000)
             {
                 var index = quest.Quest.QuestListenerParams.Where(l => l.Listener == 5020000).IndexOf(l => l.ActorSpawnSeq == listener.ActorSpawnSeq && l.ActorDespawnSeq == listener.ActorDespawnSeq);

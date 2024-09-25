@@ -19,7 +19,10 @@ namespace AutoQuest.QuestStep
         public Level Location;
         public Vector3 LocationCenter => new(Location.X, Location.Y, Location.Z);
         public uint ObjectBaseId;
-        public QuestStep() { }
+        public QuestStep(QuestWrapper quest, QuestListenerParamsStruct questListener,Level level) 
+        { 
+
+        }
         public Task<bool> Move()
         {
             return Task.FromResult(false);

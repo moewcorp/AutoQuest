@@ -1,3 +1,4 @@
+using AutoQuest.QuestStep;
 using ECommons.DalamudServices;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
@@ -12,7 +13,7 @@ namespace AutoQuest
     {
         private static QuestWrapper? ca;
         private static string fi = "";
-        public static void DrawSetting()
+        public static void DrawMain()
         {
             try
             {
@@ -56,11 +57,6 @@ namespace AutoQuest
                     AutoQuestManager.Instance.Step?.Cancel();
                     AutoQuestManager.Instance.Step = null;
                 }
-                if (ImGui.Button("Fly"))
-                {
-                    QuestWrapper.CurTerritoryTypeCanFly = true;
-                }
-                ImGui.Text(QuestWrapper.CurTerritoryTypeCanFly.ToString());
             }
             catch (Exception e)
             {
@@ -75,7 +71,10 @@ namespace AutoQuest
             69016,
             70213,
             69005,
-            70286
+            70286,
+            66337,
+            65630,
+            65611
         };
         public static void DrawDebug()
         {
@@ -108,6 +107,20 @@ namespace AutoQuest
             foreach(var D in EventFramework.Instance()->DirectorModule.DirectorList.Span)
             {
                 ImGui.Text(D.Value->String0.ToString());
+            }
+        }
+        public static void DrawSetting()
+        {
+            if(ImGui.BeginCombo("MoveType###", QuestStep.QuestStep.MoveControlType.ToString()))
+            {
+                foreach(var i in System.Enum.GetValues<MoveControlType>())
+                {
+                    if(ImGui.Selectable(i.ToString()))
+                    {
+                        QuestStep.QuestStep.MoveControlType = i;
+                    }
+                }
+                ImGui.EndCombo();
             }
         }
     }

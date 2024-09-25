@@ -42,7 +42,7 @@ namespace AutoQuest
             if (Show)
             {
                 ImGui.Begin("Setting", ref Show);
-                ImGuiEx.EzTabBar("Questddw", ("Setting", SettingWindows.DrawSetting, null, true), ("Debug", SettingWindows.DrawDebug, null, true));
+                ImGuiEx.EzTabBar("Questddw", ("Main", SettingWindows.DrawMain, null, true), ("Setting", SettingWindows.DrawSetting, null, true), ("Debug", SettingWindows.DrawDebug, null, true));
             }
         }
     }

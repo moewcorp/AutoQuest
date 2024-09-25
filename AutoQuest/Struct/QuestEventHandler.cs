@@ -11,6 +11,7 @@ using FFXIVClientStructs.STD;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Xml.Linq;
 using static Lumina.Excel.GeneratedSheets2.Quest;
 using EventHandler = FFXIVClientStructs.FFXIV.Client.Game.Event.EventHandler;
 
@@ -181,6 +182,28 @@ namespace AutoQuest.Struct
                 }
             }
             return false;
+        }
+        public int DIRECTOR_RESULT_ID_INSTANCE_CONTENT()
+        {
+            if (LuaEventHandler.LuaKey.StringPtr != null && LuaEventHandler.LuaState != null && LuaEventHandler.LuaState->State != null)
+            {
+                var top = LuaEventHandler.LuaState->State->Old.lua_gettop();
+                try
+                {
+                    LuaEventHandler.LuaState->State->Old.lua_getfield(-10002, LuaEventHandler.LuaKey.StringPtr);
+                    LuaEventHandler.LuaState->State->Old.lua_getfield(-1, "DIRECTOR_RESULT_ID_INSTANCE_CONTENT");
+                    return (int)LuaEventHandler.LuaState->State->Old.lua_tonumber(-1);
+                }
+                catch (Exception e)
+                {
+                    LogHelper.Error(e);
+                }
+                finally
+                {
+                    LuaEventHandler.LuaState->State->Old.lua_settop(top);
+                }
+            }
+            return 0;
         }
         #endregion
     }
