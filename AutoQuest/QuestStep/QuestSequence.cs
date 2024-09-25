@@ -1,9 +1,6 @@
-﻿using Lumina.Text;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ECommons.DalamudServices;
+using Lumina.Excel.GeneratedSheets2;
+using Lumina.Text;
 
 namespace AutoQuest.QuestStep
 {
@@ -12,7 +9,7 @@ namespace AutoQuest.QuestStep
         public byte Seq;
         public List<SeString> TodoMessages = [];
         public List<QuestStep> MainQuestSteps = [];
-        public List<QuestStep> AddQuestSteps = [];
+        public List<QuestStep> AdditionalQuestSteps = [];
         public QuestSequence(QuestWrapper quest, byte seq)
         {
             Seq = seq;
@@ -24,12 +21,8 @@ namespace AutoQuest.QuestStep
                 .Select(i => quest.Quest.QuestTodoMessages[i].Value.Value)
                 .ToList();
             MainQuestSteps = quest.MainInfo.First(x => x.Seq == seq).Info.Select(x => new QuestStep(quest, x.Listener, x.Level.Value)).ToList();
-            var ranges = g[false].Where(x => x.Listener == 0x5000000);
-            if(ranges.Any())
-            {
-                var allEobjects = listners.Where(x => x.Listener > 2000000 && x.Listener < 3000000);
-
-            }
+            var ranges = g[true].Where(x => x.Listener == 0x5000000);
+            AdditionalQuestSteps = ranges.Select(x => new QuestStep(quest, x, Svc.Data.GetExcelSheet<Level>().GetRow(x.ConditionValue))).ToList();
         }
     }
 }

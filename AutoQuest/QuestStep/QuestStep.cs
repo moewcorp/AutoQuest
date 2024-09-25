@@ -21,7 +21,9 @@ namespace AutoQuest.QuestStep
         public uint ObjectBaseId;
         public QuestStep(QuestWrapper quest, QuestListenerParamsStruct questListener,Level level) 
         { 
-
+            Quest = quest;
+            MainListener = questListener;
+            Location = level;
         }
         public Task<bool> Move()
         {

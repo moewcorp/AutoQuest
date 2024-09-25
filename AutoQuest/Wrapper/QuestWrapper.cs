@@ -1,3 +1,4 @@
+using AutoQuest.QuestStep;
 using Dalamud.Game.ClientState.Objects.Types;
 using ECommons.DalamudServices;
 using ECommons.GameFunctions;
@@ -103,6 +104,7 @@ namespace AutoQuest
         public string LuaFilePath => Quest.LuaFile.Path;
         public bool IsComplete => QuestManager.IsQuestComplete(QuestId);
         public IEnumerable<(byte Seq, List<(QuestListenerParamsStruct Listener, LazyRow<Level> Level)> Info)> MainInfo => Quest.QuestListenerParams.Where(l => l.ActorDespawnSeq != 0xff && !(IsPopRangeTarget(l.Listener) && GetFirstSeq(l.Listener) != l.ActorSpawnSeq)).Zip(Quest.TodoParams.SelectMany(t => t.ToDoLocation.Where(t => t.Value != null && t.Value.RowId != 0).ToList())).GroupBy(e => e.First.ActorSpawnSeq).Select(g => (g.Key, g.ToList()));
+        public Dictionary<byte, QuestSequence> Sequence => Quest.QuestListenerParams.Where(x => x.ActorSpawnSeq != 0).Select(x => x.ActorSpawnSeq).ToHashSet().Select(x => new QuestSequence(this, x)).ToDictionary(x => x.Seq);
         public bool IsPopRangeTarget(uint BaseId)
         {
             for(var i = 0; i < 50; i++)

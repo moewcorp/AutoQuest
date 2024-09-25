@@ -246,22 +246,42 @@ namespace AutoQuest
             {
                 ImGui.Text($"Start {Svc.Data.GetExcelSheet<ENpcResident>().GetRow(Quest.IssuerStart.Row).Singular}#{Quest.IssuerStart.Row} {Quest.IssuerLocation.Value.Info()}");
                 using var indent = new ImGuiIndent(20);
-                foreach (var (seq, lel) in MainInfo)
+                //foreach (var (seq, lel) in MainInfo)
+                //{
+                //    ImGui.Text($"{seq}");
+                //    foreach (var lis in lel.Select(v => v.Listener.ActorDespawnSeq).ToHashSet())
+                //    {
+                //        ImGui.Text($"- {Quest.QuestTodoMessages[lis].Value.Value}");
+                //    }
+                //    using (var indent1 = new ImGuiIndent(20))
+                //    {
+                //        foreach (var (lis, lvl) in lel)
+                //        {
+                //            ImGui.Text($"{QuestListenerString.FromQuest(lis, this)}");
+                //            ImGui.SameLine();
+                //            ImGuiHelper.ClickText(lvl.Value.Info(), "点击跳转", () =>
+                //            {
+                //                OpenMapWithMapLink(lvl.Value.ToMapLinkString());
+                //            });
+                //        }
+                //    }
+                //}
+                foreach (var (seq, lel) in Sequence)
                 {
                     ImGui.Text($"{seq}");
-                    foreach (var lis in lel.Select(v => v.Listener.ActorDespawnSeq).ToHashSet())
+                    foreach (var lis in lel.TodoMessages)
                     {
-                        ImGui.Text($"- {Quest.QuestTodoMessages[lis].Value.Value}");
+                        ImGui.Text($"- {lis}");
                     }
                     using (var indent1 = new ImGuiIndent(20))
                     {
-                        foreach (var (lis, lvl) in lel)
+                        foreach (var lis in lel.MainQuestSteps)
                         {
-                            ImGui.Text($"{QuestListenerString.FromQuest(lis, this)}");
+                            ImGui.Text($"{QuestListenerString.FromQuest(lis.MainListener, lis.Quest)}");
                             ImGui.SameLine();
-                            ImGuiHelper.ClickText(lvl.Value.Info(), "点击跳转", () =>
+                            ImGuiHelper.ClickText(lis.Location.Info(), "点击跳转", () =>
                             {
-                                OpenMapWithMapLink(lvl.Value.ToMapLinkString());
+                                OpenMapWithMapLink(lis.Location.ToMapLinkString());
                             });
                         }
                     }
