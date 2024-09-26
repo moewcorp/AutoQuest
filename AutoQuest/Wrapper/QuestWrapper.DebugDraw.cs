@@ -67,20 +67,20 @@ namespace AutoQuest
                             }
                             foreach (var obj in QuestEventHandler->LuaEventHandler.EventHandler.EventObjects)
                             {
-                                if (curs && !Quest.QuestListenerParams.Where(x => x.Listener != 0 && x.ActorSpawnSeq == CurrentSeq).Any(x => x.Listener == obj.Value->DataID))
+                                if (curs && !Quest.QuestListenerParams.Where(x => x.Listener != 0 && x.ActorSpawnSeq == CurrentSeq).Any(x => x.Listener == obj.Value->BaseId))
                                     continue;
-                                if (seq && Quest.QuestListenerParams.Where(x => x.Listener != 0 && x.ActorSpawnSeq == CurrentSeq && x.ActorDespawnSeq == 0xff).Any(x => x.Listener == obj.Value->DataID))
+                                if (seq && Quest.QuestListenerParams.Where(x => x.Listener != 0 && x.ActorSpawnSeq == CurrentSeq && x.ActorDespawnSeq == 0xff).Any(x => x.Listener == obj.Value->BaseId))
                                     continue;
                                 var o = Svc.Objects.CreateObjectReference((nint)obj.Value);
                                 if (o == null)
                                     continue;
 
-                                ImGui.Text($"{obj.Value->DataID} {obj.Value->LayoutID} {QuestEventHandler->IsAcceptEvent(o)} {obj.Value->GetObjectKind()} {QuestEventHandler->IsBattleNpcOwner()} {QuestEventHandler->IsBattleNpcTriggerOwner(o)} {QuestEventHandler->IsTargetingPossible(o)} {obj.Value->GetObjectKind()}");
+                                ImGui.Text($"{obj.Value->BaseId} {obj.Value->LayoutId} {QuestEventHandler->IsAcceptEvent(o)} {obj.Value->GetObjectKind()} {QuestEventHandler->IsBattleNpcOwner()} {QuestEventHandler->IsBattleNpcTriggerOwner(o)} {QuestEventHandler->IsTargetingPossible(o)} {obj.Value->GetObjectKind()}");
                                 if (Svc.GameGui.WorldToScreen(obj.Value->Position, out var screenPos))
                                 {
                                     ImGui.GetBackgroundDrawList().AddCircleFilled(screenPos, 5, 0xff0000ff);
                                     var fd = obj.Value->DrawObject;
-                                    ImGui.GetBackgroundDrawList().AddText(screenPos + new Vector2(0, 5), 0xff0000ff, obj.Value->DataID.ToString() + " " + (fd != null && fd->IsVisible).ToString() + " " + QuestEventHandler->IsAcceptEvent(Svc.Objects.CreateObjectReference((nint)obj.Value)) + " " + ((ulong)(obj.Value->GetObjectID())).ToString("X"));
+                                    ImGui.GetBackgroundDrawList().AddText(screenPos + new Vector2(0, 5), 0xff0000ff, obj.Value->BaseId.ToString() + " " + (fd != null && fd->IsVisible).ToString() + " " + QuestEventHandler->IsAcceptEvent(Svc.Objects.CreateObjectReference((nint)obj.Value)) + " " + ((ulong)obj.Value->GetGameObjectId()).ToString("X"));
                                 }
                             }
                         }

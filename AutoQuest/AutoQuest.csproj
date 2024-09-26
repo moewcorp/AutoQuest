@@ -9,7 +9,7 @@
   </PropertyGroup>
 
 	<PropertyGroup>
-		<DalamudLibPath>D:\Dalamud.Updater\XIVLauncher\addon\Hooks\9.1.0.12\</DalamudLibPath>
+		<DalamudLibPath>$(APPDATA)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
 	</PropertyGroup>
 
 	<ItemGroup>

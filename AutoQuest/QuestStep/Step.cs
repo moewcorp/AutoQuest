@@ -55,24 +55,24 @@ namespace AutoQuest.QuestStep
         }
         public static IStep CreateMovePostion(Vector3 pos, bool fly,bool realPos, Func<Task<bool>, bool> next) => new Step(StepType.MovePostion, cts => Move.MoveControl.Instance.Move(pos, fly, realPos, cts), next);
         public static IStep CreateMovePostion(Level pos, bool fly, Func<Task<bool>, bool> next) => CreateMovePostion(new Vector3(pos.X, pos.Y, pos.Z), fly, pos.Object.Row.IsActor() || pos.Object.Row == 5000000, next);
-        public static IStep CreateMoveTarget(GameObject Target, bool fly) => new Step(StepType.MoveTarget, cts => Move.MoveControl.Instance.Move(Target.Position, fly, true, cts), res => res.IsCompleted);
-        public unsafe static IStep CreateUseEventItem(uint item, GameObject? target) => new Step(StepType.EventItem, cts =>
+        public static IStep CreateMoveTarget(IGameObject Target, bool fly) => new Step(StepType.MoveTarget, cts => Move.MoveControl.Instance.Move(Target.Position, fly, true, cts), res => res.IsCompleted);
+        public unsafe static IStep CreateUseEventItem(uint item, IGameObject? target) => new Step(StepType.EventItem, cts =>
         {
             return Task.Run(() =>
             {
                 Task.Delay(500).Wait();
                 if(target != null)
                 {
-                    return ActionManager.Instance()->UseAction(ActionType.KeyItem, item, target.Struct()->GetObjectID());
+                    return ActionManager.Instance()->UseAction(ActionType.KeyItem, item, target.Struct()->GetGameObjectId());
                 }           
                 return ActionManager.Instance()->UseAction(ActionType.KeyItem, item);
             }, cts.Token);
         }, res => false, 10000);
-        public unsafe static IStep CreateEventStart(QuestWrapper quest, GameObject gameObject) => new Step(StepType.InteractObject, cts =>
+        public unsafe static IStep CreateEventStart(QuestWrapper quest, IGameObject gameObject) => new Step(StepType.InteractObject, cts =>
         {
             return Task.Run(() =>
             {
-                new VoidEvent((FFXIVClientStructs.FFXIV.Client.Game.Event.EventHandler*)quest.QuestEventHandler).EventStart(gameObject.Struct()->GetObjectID());
+                new VoidEvent((FFXIVClientStructs.FFXIV.Client.Game.Event.EventHandler*)quest.QuestEventHandler).EventStart(gameObject.Struct()->GetGameObjectId());
                 Task.Delay(500).Wait();
                 return true;
             }, cts.Token);
@@ -92,7 +92,7 @@ namespace AutoQuest.QuestStep
             Task.Delay(1000).Wait();
             return ret;
         }, cts.Token), res => Svc.ClientState.TerritoryType == territoryId);
-        public unsafe static IStep CreateEnemy(GameObject obj,QuestWrapper quest,uint id) => new Step(StepType.MovePostion, cts => Task.Run(() =>
+        public unsafe static IStep CreateEnemy(IGameObject obj,QuestWrapper quest,uint id) => new Step(StepType.MovePostion, cts => Task.Run(() =>
         {
             Svc.Targets.Target = obj;
             //Share.Pull = true;
@@ -104,7 +104,7 @@ namespace AutoQuest.QuestStep
             Task.Delay(1000, cts.Token);
             return Task.FromResult(true);
         }, res => true);
-        public unsafe static IStep CreateEmote(Emote emote,GameObject? obj) => new Step(StepType.Emote, cts =>
+        public unsafe static IStep CreateEmote(Emote emote,IGameObject? obj) => new Step(StepType.Emote, cts =>
         {
             Svc.Targets.Target = obj;
             ECommons.Automation.Chat.Instance.SendMessage(emote.TextCommand.Value.Command.ToString());

@@ -88,7 +88,7 @@ namespace AutoQuest
                 var list = new List<(ushort QuestId, byte Sequence)>();
                 unsafe
                 {
-                    list = QuestManager.Instance()->NormalQuestsSpan.ToArray().Select(x => (x.QuestId, x.Sequence)).ToList();
+                    list = QuestManager.Instance()->NormalQuests.ToArray().Select(x => (x.QuestId, x.Sequence)).ToList();
                 }
                 foreach (var test in TestQuest)
                 {
@@ -103,10 +103,6 @@ namespace AutoQuest
                         continue;
                     QuestWrapper.GetQuestById(quest.QuestId)?.Draw();
                 }
-            }
-            foreach(var D in EventFramework.Instance()->DirectorModule.DirectorList.Span)
-            {
-                ImGui.Text(D.Value->String0.ToString());
             }
         }
         public static void DrawSetting()

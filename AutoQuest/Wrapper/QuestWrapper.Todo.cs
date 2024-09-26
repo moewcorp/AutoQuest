@@ -1,16 +1,12 @@
 using AutoQuest.QuestStep;
-using AutoQuest.Struct;
-using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.ClientState.Objects.Types;
 using ECommons;
 using ECommons.DalamudServices;
 using FFXIVClientStructs.FFXIV.Client.Game;
-using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using Lumina.Excel.GeneratedSheets2;
 using QuestResolve.QuestStep;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
-using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 
 namespace AutoQuest
@@ -188,7 +184,7 @@ namespace AutoQuest
             }
             return levels.Count > 0 && listeners.Count > 0;
         }
-        public unsafe bool TryGetSayEvent(uint obj, byte seq, GameObject gameObject, out string str)
+        public unsafe bool TryGetSayEvent(uint obj, byte seq, IGameObject gameObject, out string str)
         {
             if (Quest.QuestListenerParams.Where(q => q.Listener == obj).Any(q => q.QuestUInt8A == 23) && DecompileCode.Value.TryGetValue("IsAcceptSayEvent", out var f))
             {
@@ -231,7 +227,7 @@ namespace AutoQuest
         }
         public unsafe bool TryTodo(out (Level? level, uint obj,byte type) todo)
         {
-            foreach (var q in QuestManager.Instance()->NormalQuestsSpan)
+            foreach (var q in QuestManager.Instance()->NormalQuests)
             {
                 if ((q.QuestId | 0x10000u) == QuestId)
                 {
@@ -286,7 +282,7 @@ namespace AutoQuest
         {
             get
             {
-                foreach (var item in QuestManager.Instance()->NormalQuestsSpan)
+                foreach (var item in QuestManager.Instance()->NormalQuests)
                 {
                     if ((item.QuestId | 0x10000u) == QuestId)
                         return item.Sequence;
@@ -298,7 +294,7 @@ namespace AutoQuest
         {
             if (index > 0 && index < 8)
             {
-                foreach (var item in QuestManager.Instance()->NormalQuestsSpan)
+                foreach (var item in QuestManager.Instance()->NormalQuests)
                 {
                     if ((item.QuestId | 0x10000u) == QuestId)
                         return ((item.Variables[5] >> (8 - index)) & 1) == 1;

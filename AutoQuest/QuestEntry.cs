@@ -11,9 +11,9 @@ namespace AutoQuest
     public class QuestEntry : IDalamudPlugin
     {
         public string Name => GetType().Name;
-        public static DalamudPluginInterface PluginInterface;
+        public static IDalamudPluginInterface PluginInterface;
 
-        public QuestEntry(DalamudPluginInterface pluginInterface)
+        public QuestEntry(IDalamudPluginInterface pluginInterface)
         {
             PluginInterface = pluginInterface;
             ECommonsMain.Init(pluginInterface, this);

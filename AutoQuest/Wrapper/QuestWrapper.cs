@@ -36,9 +36,9 @@ namespace AutoQuest
             }
             return false;
         }
-        public bool FindRelatedObjectInMemory([NotNullWhen(true)]out List<GameObject> objects)
+        public bool FindRelatedObjectInMemory([NotNullWhen(true)]out List<IGameObject> objects)
         {
-            objects = new List<GameObject>();
+            objects = new List<IGameObject>();
             if (QuestEventHandler != null)
             {
                 foreach (var obj in QuestEventHandler->LuaEventHandler.EventHandler.EventObjects)
@@ -50,7 +50,7 @@ namespace AutoQuest
             }
             return objects.Count > 0;
         }
-        public bool FindObjectWithDataIdInMemory(uint dataId,[NotNullWhen(true)] out GameObject? obj)
+        public bool FindObjectWithDataIdInMemory(uint dataId,[NotNullWhen(true)] out IGameObject? obj)
         {
             obj = null;
             if (FindRelatedObjectInMemory(out var list))
@@ -66,14 +66,14 @@ namespace AutoQuest
             }
             return obj != null;
         }
-        public bool FindObjectWithLayoutIDInMemory(uint LayoutID, [NotNullWhen(true)] out GameObject? obj)
+        public bool FindObjectWithLayoutIDInMemory(uint LayoutID, [NotNullWhen(true)] out IGameObject? obj)
         {
             obj = null;
             if (FindRelatedObjectInMemory(out var list))
             {
                 foreach (var c in list.OrderBy(o => (o.Position - Svc.ClientState.LocalPlayer.Position).Length()))
                 {
-                    if (c.Struct()->LayoutID == LayoutID)
+                    if (c.Struct()->LayoutId == LayoutID)
                     {
                         obj = c;
                         break;

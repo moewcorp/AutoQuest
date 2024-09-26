@@ -71,7 +71,7 @@ namespace AutoQuest.Move
 
         public Task<bool> Move(Level l, bool fly) => Move(new Vector3(l.X, l.Y, l.Z), fly, false, new CancellationTokenSource());
 
-        public Task<bool> Move(GameObject obj, bool fly) => Move(obj.Position, fly, true, new CancellationTokenSource());
+        public Task<bool> Move(IGameObject obj, bool fly) => Move(obj.Position, fly, true, new CancellationTokenSource());
 
         public Task<bool> Move(Vector3 pos, bool fly,bool real = true, CancellationTokenSource? cts = null)
         {

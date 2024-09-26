@@ -6,12 +6,12 @@ namespace AutoQuest.Extension
 {
     internal static class GameobjectExtension
     {
-        public static unsafe bool IsVisible(this GameObject gameObject)
+        public static unsafe bool IsVisible(this IGameObject gameObject)
         {
             var s = gameObject.Struct()->DrawObject;
             return s != null && s->IsVisible;
         }
-        public static unsafe string Call(this GameObject gameObject)
+        public static unsafe string Call(this IGameObject gameObject)
         {
             var obj = gameObject.Struct();
             if(obj != null)

@@ -17,7 +17,7 @@ namespace AutoQuest
         /// <param name="col"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
-        public static uint GetLevelRowId(this Lumina.Excel.GeneratedSheets.Quest quest, int row, int col)
+        public static uint GetLevelRowId(this Lumina.Excel.GeneratedSheets2.Quest quest, int row, int col)
         {
             if (row >= 24 || col >= 8)
                 throw new ArgumentOutOfRangeException();
@@ -25,12 +25,12 @@ namespace AutoQuest
                 return ((quest.GetType().GetProperty($"Unknown{baseIdx}")?.GetValue(quest) as uint[])?[row] ?? 0);
             return (uint?)(quest.GetType().GetProperty($"Unknown{baseIdx + (col * 24) + row}")?.GetValue(quest)) ?? 0;
         }
-        public static Level? GetLevel(this Lumina.Excel.GeneratedSheets.Quest quest, int row, int col)
+        public static Level? GetLevel(this Lumina.Excel.GeneratedSheets2.Quest quest, int row, int col)
         {
             var id = quest.GetLevelRowId(row, col);
             return id == 0 ? null : Svc.Data.GetExcelSheet<Level>()?.GetRow(id);
         }
-        public static object? GetValue(this Level level, Lumina.Excel.GeneratedSheets.Quest quest)
+        public static object? GetValue(this Level level, Lumina.Excel.GeneratedSheets2.Quest quest)
         {
             return level.Type switch
             {
@@ -41,7 +41,7 @@ namespace AutoQuest
                 _ => null
             } ;
         }
-        public static object? GetContentFinderCondition(Level level, Lumina.Excel.GeneratedSheets.Quest quest)
+        public static object? GetContentFinderCondition(Level level, Lumina.Excel.GeneratedSheets2.Quest quest)
         {
             if(level.Type == 51)
             {
@@ -75,7 +75,7 @@ namespace AutoQuest
         /// <param name="gameObject"></param>
         /// <param name="pEventHandles">List<EventHandle*> <see cref="EventHandler*"/></param>
         /// <returns>List<EventHandle*>.Count <see cref="EventHandler*"/><</returns>
-        public static uint GetEventList(this Dalamud.Game.ClientState.Objects.Types.GameObject gameObject, out List<long> pEventHandles)
+        public static uint GetEventList(this Dalamud.Game.ClientState.Objects.Types.IGameObject gameObject, out List<long> pEventHandles)
         {
             var v = GetVirtualFunction<VtGetEventList>(gameObject.Address, 0, 34);
             var p = (long*)Marshal.AllocHGlobal(0x100);
@@ -89,7 +89,7 @@ namespace AutoQuest
             return count;
         }
 
-        public static bool DistanceCanStartEvent(this Dalamud.Game.ClientState.Objects.Types.GameObject gameObject)
+        public static bool DistanceCanStartEvent(this Dalamud.Game.ClientState.Objects.Types.IGameObject gameObject)
         {
             var dis = (Svc.ClientState.LocalPlayer.Position - gameObject.Position).Length() - gameObject.HitboxRadius - Svc.ClientState.LocalPlayer.HitboxRadius;
             return gameObject.ObjectKind switch
@@ -100,7 +100,7 @@ namespace AutoQuest
                 _ => false
             };
         }
-        public static bool HasEvent(this Dalamud.Game.ClientState.Objects.Types.GameObject gameObject) => gameObject.GetEventList(out _) > 0;
+        public static bool HasEvent(this Dalamud.Game.ClientState.Objects.Types.IGameObject gameObject) => gameObject.GetEventList(out _) > 0;
         public static List<string> GetPropertyNameAndValueString(this object obj)
         {
             var list = new List<string>();

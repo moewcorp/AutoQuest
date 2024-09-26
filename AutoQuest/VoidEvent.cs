@@ -51,7 +51,7 @@ namespace AutoQuest
             var EventNpclist = Svc.Objects.Where(o => o.HasEvent() && o.DistanceCanStartEvent() && o.Name.ToString() != "").OrderBy(o => Math.Abs((Svc.ClientState.LocalPlayer ?? throw new NullReferenceException(nameof(Svc.ClientState.LocalPlayer))).Position.Y - o.Position.Y)).ToList();
             if (EventNpclist.Count > 0)
             {
-                return ((GameObject*)EventNpclist.First().Address)->GetObjectID().ObjectID;
+                return ((GameObject*)EventNpclist.First().Address)->GetGameObjectId().ObjectId;
             }
             return 0;
         }
